@@ -143,28 +143,28 @@ class ViewController: UIViewController {
         avPlayer.rate = 0.1
     }
     
-    // MARK: - Speed 0.75x
+    // MARK: - Speed Normal (1.0x)
     @IBAction func setSpeedNormal(_ sender: Any) {
         avPlayer.currentItem?.audioTimePitchAlgorithm = .timeDomain
         avPlayer.play()
         avPlayer.rate = 1.0
     }
     
-    // MARK: - Speed Normal (1.0x)
+    // MARK: - Speed 2x
     @IBAction func setSpeed2x(_ sender: Any) {
         avPlayer.currentItem?.audioTimePitchAlgorithm = .timeDomain
         avPlayer.play()
         avPlayer.rate = 2.0
     }
     
-    // MARK: - Speed 1.5x
+    // MARK: - Speed 4x
     @IBAction func setSpeed4x(_ sender: Any) {
         avPlayer.currentItem?.audioTimePitchAlgorithm = .timeDomain
         avPlayer.play()
         avPlayer.rate = 4.0
     }
     
-    // MARK: - Speed 2x
+    // MARK: - Speed 6x
     @IBAction func setSpeed6x(_ sender: Any) {
         avPlayer.currentItem?.audioTimePitchAlgorithm = .timeDomain
         avPlayer.play()
