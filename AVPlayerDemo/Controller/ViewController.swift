@@ -13,13 +13,13 @@ class ViewController: UIViewController {
     /// This is the outlet of UIView, where the video shows. The helps to set the position of PlayerLayer
     @IBOutlet weak var playerView: UIView!
     /// This is a button outlet, which can control exit/enter in full screen mode
-    @IBOutlet weak var fullScreenBtnOutlet: UIButton!
+    @IBOutlet weak var fullScreenButtonOutlet: UIButton!
     /// This is a button outlet, which can start the video from the begenning each time we clicked
-    @IBOutlet weak var StartBtnOutlet: UIButton!
+    @IBOutlet weak var startButtonOutlet: UIButton!
     /// This is a button outlet, which can control play and pause both
-    @IBOutlet weak var playAndPauseBtnOutlet: UIButton!
+    @IBOutlet weak var playAndPauseButtonOutlet: UIButton!
     /// This is the array of speed buttons. E.g., 0.75x, 1x, 1.5x, 2x, etc
-    @IBOutlet var speedsBtnOutlet: [UIButton]!
+    @IBOutlet var speedsButtonOutlet: [UIButton]!
     /// Speed StackView. All the speed buttons are inside it
     @IBOutlet weak var speedStackView: UIStackView!
     
@@ -68,10 +68,16 @@ class ViewController: UIViewController {
         playerLayer.player = nil
         
         // Initially the Pause button will be Visisble
-        playAndPauseBtnOutlet.setImage(UIImage(systemName: "pause.fill"), for: .normal)
+        playAndPauseButtonOutlet.setImage(UIImage(systemName: "pause.fill"), for: .normal)
         
         let url = Bundle.main.url(forResource: "Sample3", withExtension: "mp4")
-        avPlayer = AVPlayer(url: url!)
+        
+        guard let url = url else {
+            print("Video doesn't exist or format issue. Please make sure the correct name of the video and format.")
+            return
+        }
+        
+        avPlayer = AVPlayer(url: url)
         
         playerLayer = AVPlayerLayer(player: avPlayer)
         
@@ -81,10 +87,10 @@ class ViewController: UIViewController {
         playerLayer.frame = self.playerView.layer.bounds
         
         // Set the full Screen Button to playerView
-        self.playerView.addSubview(fullScreenBtnOutlet)
+        self.playerView.addSubview(fullScreenButtonOutlet)
         
         // Set the play Button to playerView
-        self.playerView.addSubview(playAndPauseBtnOutlet)
+        self.playerView.addSubview(playAndPauseButtonOutlet)
         
         // Set the speed stackView to playerView
         self.playerView.addSubview(speedStackView)
@@ -115,11 +121,11 @@ class ViewController: UIViewController {
     @IBAction func playAndPauseVideo(_ sender: Any) {
         if !isPause {
             avPlayer.pause()
-            playAndPauseBtnOutlet.setImage(UIImage(systemName: "play.fill"), for: .normal)
+            playAndPauseButtonOutlet.setImage(UIImage(systemName: "play.fill"), for: .normal)
         }
         else {
             avPlayer.play()
-            playAndPauseBtnOutlet.setImage(UIImage(systemName: "pause.fill"), for: .normal)
+            playAndPauseButtonOutlet.setImage(UIImage(systemName: "pause.fill"), for: .normal)
         }
         isPause = !isPause
     }
@@ -128,7 +134,7 @@ class ViewController: UIViewController {
     /// By clicking it, all the speed option will be visible and invisible
     @IBAction func selectSpeed(_ sender: Any) {
         
-        speedsBtnOutlet.forEach { button in
+        speedsButtonOutlet.forEach { button in
             UIView.animate(withDuration: 0.3) {
                 button.isHidden = !button.isHidden
                 self.view.layoutIfNeeded()
@@ -141,6 +147,7 @@ class ViewController: UIViewController {
         avPlayer.currentItem?.audioTimePitchAlgorithm = .timeDomain
         avPlayer.play()
         avPlayer.rate = 0.1
+        hideSpeedButton()
     }
     
     // MARK: - Speed Normal (1.0x)
@@ -148,6 +155,7 @@ class ViewController: UIViewController {
         avPlayer.currentItem?.audioTimePitchAlgorithm = .timeDomain
         avPlayer.play()
         avPlayer.rate = 1.0
+        hideSpeedButton()
     }
     
     // MARK: - Speed 2x
@@ -155,6 +163,7 @@ class ViewController: UIViewController {
         avPlayer.currentItem?.audioTimePitchAlgorithm = .timeDomain
         avPlayer.play()
         avPlayer.rate = 2.0
+        hideSpeedButton()
     }
     
     // MARK: - Speed 4x
@@ -162,6 +171,7 @@ class ViewController: UIViewController {
         avPlayer.currentItem?.audioTimePitchAlgorithm = .timeDomain
         avPlayer.play()
         avPlayer.rate = 4.0
+        hideSpeedButton()
     }
     
     // MARK: - Speed 6x
@@ -169,6 +179,7 @@ class ViewController: UIViewController {
         avPlayer.currentItem?.audioTimePitchAlgorithm = .timeDomain
         avPlayer.play()
         avPlayer.rate = 6.0
+        hideSpeedButton()
     }
     
     // MARK: - Function to convert degree to radian
@@ -186,13 +197,13 @@ class ViewController: UIViewController {
             let affineTransform = CGAffineTransform(rotationAngle: degreeToRadian(360))
             playerLayer.setAffineTransform(affineTransform)
 
-            playAndPauseBtnOutlet.transform = CGAffineTransform(rotationAngle: degreeToRadian(360))
+            playAndPauseButtonOutlet.transform = CGAffineTransform(rotationAngle: degreeToRadian(360))
             
             playerView.transform = CGAffineTransform(rotationAngle: degreeToRadian(360))
         }
         
         playerView.isHidden = false
-        StartBtnOutlet.isHidden = false
+        startButtonOutlet.isHidden = false
 
         let width = view.bounds.width - 10
         self.view.addSubview(self.playerView)
@@ -240,18 +251,18 @@ class ViewController: UIViewController {
     }
     
     // MARK: - Function to show the video in landscape mode
-    /// This function calls when the device is in landscape mode. It hides all the button and UIView and set the playerLayer frame to the main view (To cover entire screen).
+    /// This function calls when the device is in landscape mode. It hides all the button and UIView and set the playerViewframe to the main view (To cover entire screen).
     func showVideoInLandscape() {
         if isRotate {
             let affineTransform = CGAffineTransform(rotationAngle: degreeToRadian(360))
             playerLayer.setAffineTransform(affineTransform)
             
-            playAndPauseBtnOutlet.transform = CGAffineTransform(rotationAngle: degreeToRadian(360))
+            playAndPauseButtonOutlet.transform = CGAffineTransform(rotationAngle: degreeToRadian(360))
             
             playerView.transform = CGAffineTransform(rotationAngle: degreeToRadian(360))
         }
 
-        StartBtnOutlet.isHidden = true
+        startButtonOutlet.isHidden = true
         
         self.view.addSubview(self.playerView)
         playerView.translatesAutoresizingMaskIntoConstraints = true
@@ -260,12 +271,12 @@ class ViewController: UIViewController {
         playerLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
     }
     
-    /// This function works when we click the full screen button to enter in full screen mode. It rotates PlayerLayer and playAndPauseBtnOutlet and set the PlayerLayer frame to the main view.
+    /// This function works when we click the full screen button to enter in full screen mode. It rotates playerView and set the playerView frame to the main view.
     func enterFullScreen() {
         //Rotate the playerView to 90 Degree
         playerView.transform = CGAffineTransform(rotationAngle: degreeToRadian(90))
         
-        StartBtnOutlet.isHidden = true
+        startButtonOutlet.isHidden = true
         self.view.addSubview(self.playerView)
         playerView.translatesAutoresizingMaskIntoConstraints = true
         self.playerView.frame = self.view.bounds
@@ -279,5 +290,15 @@ class ViewController: UIViewController {
     func ExitFullScreen() {
         showVideoInPortrait()
         self.isRotate = false
+    }
+    
+    /// This function hides the speed options when we tap any one of them
+    func hideSpeedButton() {
+        speedsButtonOutlet.forEach { button in
+            UIView.animate(withDuration: 0.3) {
+                button.isHidden = true
+                self.view.layoutIfNeeded()
+            }
+        }
     }
 }

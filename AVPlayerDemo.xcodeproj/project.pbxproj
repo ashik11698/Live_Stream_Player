@@ -43,6 +43,47 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		042D90A02A309105005FBC28 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				04D491572A28916300490D84 /* ViewController.swift */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
+		042D90A12A309112005FBC28 /* Delegate */ = {
+			isa = PBXGroup;
+			children = (
+				04D491552A28916300490D84 /* SceneDelegate.swift */,
+				04D491532A28916300490D84 /* AppDelegate.swift */,
+			);
+			path = Delegate;
+			sourceTree = "<group>";
+		};
+		042D90A22A309122005FBC28 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				043B0CAE2A307EFA00FCC53C /* Sample3.mp4 */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		042D90A32A309132005FBC28 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				04B890552A2DA032008D7C7D /* AVPlayerManager.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		042D90A42A309140005FBC28 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				0435059E2A298D68005CBCAE /* UIView+Ext.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
 		04D491472A28916300490D84 = {
 			isa = PBXGroup;
 			children = (
@@ -62,12 +103,11 @@
 		04D491522A28916300490D84 /* AVPlayerDemo */ = {
 			isa = PBXGroup;
 			children = (
-				04D491532A28916300490D84 /* AppDelegate.swift */,
-				04D491552A28916300490D84 /* SceneDelegate.swift */,
-				04D491572A28916300490D84 /* ViewController.swift */,
-				043B0CAE2A307EFA00FCC53C /* Sample3.mp4 */,
-				04B890552A2DA032008D7C7D /* AVPlayerManager.swift */,
-				0435059E2A298D68005CBCAE /* UIView+Ext.swift */,
+				042D90A42A309140005FBC28 /* Utilities */,
+				042D90A32A309132005FBC28 /* Components */,
+				042D90A22A309122005FBC28 /* Resources */,
+				042D90A12A309112005FBC28 /* Delegate */,
+				042D90A02A309105005FBC28 /* Controller */,
 				04D491592A28916300490D84 /* Main.storyboard */,
 				04D4915C2A28916400490D84 /* Assets.xcassets */,
 				04D4915E2A28916400490D84 /* LaunchScreen.storyboard */,

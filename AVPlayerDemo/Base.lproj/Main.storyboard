@@ -56,7 +56,7 @@
                                         </connections>
                                     </button>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="bottom" translatesAutoresizingMaskIntoConstraints="NO" id="nZd-Sg-RZv">
-                                        <rect key="frame" x="315" y="141" width="33" height="24"/>
+                                        <rect key="frame" x="305" y="141" width="33" height="24"/>
                                         <subviews>
                                             <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7aj-It-4T9">
                                                 <rect key="frame" x="3" y="0.0" width="30" height="0.0"/>
@@ -123,7 +123,7 @@
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstAttribute="trailing" secondItem="nZd-Sg-RZv" secondAttribute="trailing" constant="25" id="NU0-yq-gfx"/>
+                                    <constraint firstAttribute="trailing" secondItem="nZd-Sg-RZv" secondAttribute="trailing" constant="35" id="NU0-yq-gfx"/>
                                     <constraint firstItem="I1z-po-JsC" firstAttribute="centerX" secondItem="faY-67-he5" secondAttribute="centerX" id="Pjc-QS-KZv"/>
                                     <constraint firstAttribute="height" constant="180" id="X7f-9N-IHj"/>
                                     <constraint firstItem="uBz-r0-31G" firstAttribute="leading" secondItem="faY-67-he5" secondAttribute="leading" constant="30" id="kb5-Vv-Pjx"/>
@@ -144,16 +144,16 @@
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="StartBtnOutlet" destination="Lfq-G7-Grt" id="363-py-pmL"/>
-                        <outlet property="fullScreenBtnOutlet" destination="uBz-r0-31G" id="K2O-rb-ncu"/>
-                        <outlet property="playAndPauseBtnOutlet" destination="I1z-po-JsC" id="EhZ-gd-85F"/>
+                        <outlet property="fullScreenButtonOutlet" destination="uBz-r0-31G" id="K2O-rb-ncu"/>
+                        <outlet property="playAndPauseButtonOutlet" destination="I1z-po-JsC" id="EhZ-gd-85F"/>
                         <outlet property="playerView" destination="faY-67-he5" id="4c7-KG-j65"/>
                         <outlet property="speedStackView" destination="nZd-Sg-RZv" id="jrp-d3-otd"/>
-                        <outletCollection property="speedsBtnOutlet" destination="1ov-MO-igP" collectionClass="NSMutableArray" id="ngv-Qj-XBR"/>
-                        <outletCollection property="speedsBtnOutlet" destination="Urg-tg-53G" collectionClass="NSMutableArray" id="wcy-lA-aPn"/>
-                        <outletCollection property="speedsBtnOutlet" destination="6cC-3c-gag" collectionClass="NSMutableArray" id="JXO-X5-IT2"/>
-                        <outletCollection property="speedsBtnOutlet" destination="7aj-It-4T9" collectionClass="NSMutableArray" id="iz8-A3-NfC"/>
-                        <outletCollection property="speedsBtnOutlet" destination="3hL-yC-ObZ" collectionClass="NSMutableArray" id="hLU-tf-NYG"/>
+                        <outlet property="startButtonOutlet" destination="Lfq-G7-Grt" id="363-py-pmL"/>
+                        <outletCollection property="speedsButtonOutlet" destination="1ov-MO-igP" collectionClass="NSMutableArray" id="ngv-Qj-XBR"/>
+                        <outletCollection property="speedsButtonOutlet" destination="Urg-tg-53G" collectionClass="NSMutableArray" id="wcy-lA-aPn"/>
+                        <outletCollection property="speedsButtonOutlet" destination="6cC-3c-gag" collectionClass="NSMutableArray" id="JXO-X5-IT2"/>
+                        <outletCollection property="speedsButtonOutlet" destination="7aj-It-4T9" collectionClass="NSMutableArray" id="iz8-A3-NfC"/>
+                        <outletCollection property="speedsButtonOutlet" destination="3hL-yC-ObZ" collectionClass="NSMutableArray" id="hLU-tf-NYG"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
