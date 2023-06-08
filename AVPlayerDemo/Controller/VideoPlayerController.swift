@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  VideoPlayerController.swift
 //  AVPlayerDemo
 //
 //  Created by Mac on 1/6/23.
@@ -8,7 +8,7 @@
 import UIKit
 import AVKit
 
-class ViewController: UIViewController {
+class VideoPlayerController: UIViewController {
     
     /// This is the outlet of UIView, where the video shows. The helps to set the position of PlayerLayer
     @IBOutlet weak var playerView: UIView!
@@ -22,6 +22,8 @@ class ViewController: UIViewController {
     @IBOutlet var speedsButtonOutlet: [UIButton]!
     /// Speed StackView. All the speed buttons are inside it
     @IBOutlet weak var speedStackView: UIStackView!
+    /// Slider to slide the video
+    @IBOutlet weak var slider: UISlider!
     
     /// Tracks whether the video in rotated or not
     var isRotate = false
@@ -50,9 +52,11 @@ class ViewController: UIViewController {
             let orientation = self.deviceOrientation()
             if orientation == "Portrait" {
                 self.showVideoInPortrait()
+                self.isRotate = false
             }
             if orientation == "Landscape Right" {
                 self.showVideoInLandscape()
+                self.isRotate = true
             }
             if orientation == "Landscape Left" {
                 self.showVideoInLandscape()
@@ -70,7 +74,8 @@ class ViewController: UIViewController {
         // Initially the Pause button will be Visisble
         playAndPauseButtonOutlet.setImage(UIImage(systemName: "pause.fill"), for: .normal)
         
-        let url = Bundle.main.url(forResource: "Sample3", withExtension: "mp4")
+        //let url = Bundle.main.url(forResource: "Sample3", withExtension: "mp4")
+        let url = URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
         
         guard let url = url else {
             print("Video doesn't exist or format issue. Please make sure the correct name of the video and format.")
@@ -80,6 +85,8 @@ class ViewController: UIViewController {
         avPlayer = AVPlayer(url: url)
         
         playerLayer = AVPlayerLayer(player: avPlayer)
+        
+        configureSlider()
         
         self.playerView.layer.addSublayer(playerLayer)
         
@@ -94,6 +101,9 @@ class ViewController: UIViewController {
         
         // Set the speed stackView to playerView
         self.playerView.addSubview(speedStackView)
+        
+        // Set the slider to playerView
+        self.playerView.addSubview(slider)
         
         playerLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
         
@@ -300,5 +310,53 @@ class ViewController: UIViewController {
                 self.view.layoutIfNeeded()
             }
         }
+    }
+    
+    // MARK: - Configure the Slider
+    /// Did all the tasks of slider here
+    func configureSlider() {
+        slider.minimumValue = 0
+        let duration = self.avPlayer.currentItem?.asset.duration
+        
+        guard let duration = duration else {
+            return
+        }
+        
+        let seconds : Float64 = CMTimeGetSeconds(duration)
+     
+        slider.maximumValue = Float(seconds)
+        slider.isContinuous = true
+        slider.tintColor = UIColor.red
+        
+        let timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+            let currentTime = self?.getCurrentTimeOfVideo()
+            self?.slider.setValue(Float(currentTime ?? 0.0), animated: true)
+        }
+        
+        if Float64(slider.maximumValue) == getCurrentTimeOfVideo() {
+            timer.invalidate()
+            print("timer.invalidate()")
+        }
+        
+        slider.addTarget(self, action: #selector(self.playbackSliderValueChanged(_:)), for: .valueChanged)
+    }
+    
+    @objc func playbackSliderValueChanged(_ playbackSlider: UISlider) {
+        let seconds: Int64 = Int64(playbackSlider.value)
+        let targetTime: CMTime = CMTimeMake(value: seconds, timescale: 1)
+        
+        avPlayer.seek(to: targetTime)
+    }
+    
+    // MARK: - getCurrentTimeOfVideo
+    /// This function get the current time and return
+    /// - Returns: returns the current time of video
+    func getCurrentTimeOfVideo() -> Float64 {
+        let currentTime = avPlayer.currentItem?.currentTime()
+        guard let currentTime = currentTime else {
+            return 0.0
+        }
+        let currentTimeInSeconds : Float64 = CMTimeGetSeconds(currentTime)
+        return currentTimeInSeconds
     }
 }
