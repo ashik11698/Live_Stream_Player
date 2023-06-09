@@ -127,9 +127,28 @@
                                         <rect key="frame" x="168" y="71.666666666666657" width="37" height="37"/>
                                         <color key="color" systemColor="systemRedColor"/>
                                     </activityIndicatorView>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="di4-zA-JVh">
+                                        <rect key="frame" x="242.66666666666663" y="73" width="56" height="34.333333333333343"/>
+                                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" image="forward.fill" catalog="system" title=""/>
+                                        <connections>
+                                            <action selector="skipVideoInForward:" destination="BYZ-38-t0r" eventType="touchUpInside" id="gQs-Yx-vJq"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="J9G-Vf-eGu">
+                                        <rect key="frame" x="74.666666666666671" y="73" width="56.000000000000014" height="34.333333333333343"/>
+                                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" image="backward.fill" catalog="system" title=""/>
+                                        <connections>
+                                            <action selector="skipVideoInBackward:" destination="BYZ-38-t0r" eventType="touchUpInside" id="TZ9-8c-4X1"/>
+                                        </connections>
+                                    </button>
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
+                                    <constraint firstItem="I1z-po-JsC" firstAttribute="leading" secondItem="J9G-Vf-eGu" secondAttribute="trailing" constant="35" id="6NP-gs-njN"/>
                                     <constraint firstItem="Mek-2a-Q8W" firstAttribute="centerX" secondItem="faY-67-he5" secondAttribute="centerX" id="8t2-XD-ssF"/>
                                     <constraint firstAttribute="bottom" secondItem="9Ni-fh-uqa" secondAttribute="bottom" constant="10" id="CmZ-eC-Xpf"/>
                                     <constraint firstItem="uBz-r0-31G" firstAttribute="leading" secondItem="faY-67-he5" secondAttribute="leading" constant="30" id="Hei-5f-a7i"/>
@@ -138,10 +157,13 @@
                                     <constraint firstItem="I1z-po-JsC" firstAttribute="centerX" secondItem="faY-67-he5" secondAttribute="centerX" id="Pjc-QS-KZv"/>
                                     <constraint firstAttribute="height" constant="180" id="X7f-9N-IHj"/>
                                     <constraint firstItem="Mek-2a-Q8W" firstAttribute="centerY" secondItem="faY-67-he5" secondAttribute="centerY" id="XrJ-he-TUl"/>
+                                    <constraint firstItem="di4-zA-JVh" firstAttribute="centerY" secondItem="faY-67-he5" secondAttribute="centerY" id="bGu-52-PpU"/>
                                     <constraint firstItem="uBz-r0-31G" firstAttribute="top" secondItem="faY-67-he5" secondAttribute="top" constant="15" id="kBF-bp-VQD"/>
                                     <constraint firstItem="9Ni-fh-uqa" firstAttribute="leading" secondItem="faY-67-he5" secondAttribute="leading" constant="20" id="lEF-kS-6Q7"/>
                                     <constraint firstItem="I1z-po-JsC" firstAttribute="centerY" secondItem="faY-67-he5" secondAttribute="centerY" id="mhX-LX-ZW2"/>
                                     <constraint firstAttribute="bottom" secondItem="nZd-Sg-RZv" secondAttribute="bottom" constant="15" id="o9Q-OH-MLQ"/>
+                                    <constraint firstItem="J9G-Vf-eGu" firstAttribute="centerY" secondItem="faY-67-he5" secondAttribute="centerY" id="s7Q-Kd-IAk"/>
+                                    <constraint firstItem="di4-zA-JVh" firstAttribute="leading" secondItem="I1z-po-JsC" secondAttribute="trailing" constant="35" id="yhK-Ha-uBg"/>
                                 </constraints>
                             </view>
                         </subviews>
@@ -157,6 +179,8 @@
                     </view>
                     <connections>
                         <outlet property="activityIndicator" destination="Mek-2a-Q8W" id="UId-Y3-khA"/>
+                        <outlet property="backwardSkipButtonOutlet" destination="J9G-Vf-eGu" id="Pac-ht-HAK"/>
+                        <outlet property="forwardSkipButtonOutlet" destination="di4-zA-JVh" id="LtC-Tt-A2Q"/>
                         <outlet property="fullScreenButtonOutlet" destination="uBz-r0-31G" id="K2O-rb-ncu"/>
                         <outlet property="playAndPauseButtonOutlet" destination="I1z-po-JsC" id="EhZ-gd-85F"/>
                         <outlet property="playerView" destination="faY-67-he5" id="4c7-KG-j65"/>
@@ -176,6 +200,8 @@
         </scene>
     </scenes>
     <resources>
+        <image name="backward.fill" catalog="system" width="128" height="77"/>
+        <image name="forward.fill" catalog="system" width="128" height="77"/>
         <image name="pause.fill" catalog="system" width="117" height="128"/>
         <image name="square.dashed" catalog="system" width="128" height="114"/>
         <systemColor name="systemBackgroundColor">

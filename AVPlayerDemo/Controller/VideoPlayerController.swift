@@ -26,6 +26,10 @@ class VideoPlayerController: UIViewController {
     @IBOutlet weak var slider: UISlider!
     /// Activity Indicator to show buffer
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    /// To skip the video in forward
+    @IBOutlet weak var forwardSkipButtonOutlet: UIButton!
+    /// To skip the video in backward
+    @IBOutlet weak var backwardSkipButtonOutlet: UIButton!
     
     /// Tracks whether the video in rotated or not
     var isRotate = false
@@ -43,6 +47,8 @@ class VideoPlayerController: UIViewController {
         fullScreenButtonOutlet.isHidden = true
         speedStackView.isHidden = true
         slider.isHidden = true
+        forwardSkipButtonOutlet.isHidden = true
+        backwardSkipButtonOutlet.isHidden = true
     }
     
     // MARK: - Executes when phone orientation changes
@@ -58,17 +64,18 @@ class VideoPlayerController: UIViewController {
 
             // Perform any animations or layout-related operations during the transition
             let orientation = Utils.shared.deviceOrientation()
-            if orientation == "Portrait" {
+            if orientation == Keys.orientation.portrait.rawValue {
                 self.showVideoInPortrait()
                 self.isRotate = false
             }
-            if orientation == "Landscape Right" {
+            if orientation == Keys.orientation.landscapeRight.rawValue {
                 self.showVideoInLandscape()
                 self.isRotate = true
             }
-            if orientation == "Landscape Left" {
+            if orientation == Keys.orientation.landscapeLeft.rawValue {
                 self.showVideoInLandscape()
             }
+
         }, completion: nil)
     }
     
@@ -87,6 +94,8 @@ class VideoPlayerController: UIViewController {
                         self?.fullScreenButtonOutlet.isHidden = false
                         self?.speedStackView.isHidden = false
                         self?.slider.isHidden = false
+                        self?.forwardSkipButtonOutlet.isHidden = false
+                        self?.backwardSkipButtonOutlet.isHidden = false
                     } else {
                         self?.activityIndicator.startAnimating()
                         self?.activityIndicator.isHidden = false
@@ -144,6 +153,12 @@ class VideoPlayerController: UIViewController {
         // Set the activity indicator to playerView
         self.playerView.addSubview(activityIndicator)
         
+        // Set the forwardSkipButtonOutlet to playerView
+        self.playerView.addSubview(forwardSkipButtonOutlet)
+        
+        // Set the backwardSkipButtonOutlet to playerView
+        self.playerView.addSubview(backwardSkipButtonOutlet)
+        
         playerLayer.videoGravity = AVLayerVideoGravity.resizeAspect
         
         // Play the video
@@ -182,7 +197,6 @@ class VideoPlayerController: UIViewController {
     // MARK: - Speed Button
     /// By clicking it, all the speed option will be visible and invisible
     @IBAction func selectSpeed(_ sender: Any) {
-        
         speedsButtonOutlet.forEach { button in
             UIView.animate(withDuration: 0.3) {
                 button.isHidden = !button.isHidden
@@ -231,24 +245,21 @@ class VideoPlayerController: UIViewController {
         hideSpeedButton()
     }
     
-    // MARK: - Function to convert degree to radian
-    /// This function to convert degree to radian
-    /// - Parameter x: Takes degree as CGFloat
-    /// - Returns: Returns radian value as CGFloat of given degree
-    func degreeToRadian(_ x: CGFloat) -> CGFloat {
-        return .pi * x / 180.0
+    // MARK: - Forward Skip
+    @IBAction func skipVideoInForward(_ sender: Any) {
+        skipTimeForward(seconds: 10)
+    }
+    
+    // MARK: - Backward Skip
+    @IBAction func skipVideoInBackward(_ sender: Any) {
+        skipTimeBackward(seconds: 10)
     }
     
     // MARK: - Function to show the video in portrait mode
     /// This functions calls, when we need to show the video in portrait mode. This function rotates playerLayer and playAndPauseBtnOutlet 360 degree to set the video straight.
     func showVideoInPortrait() {
         if isRotate {
-            let affineTransform = CGAffineTransform(rotationAngle: degreeToRadian(360))
-            playerLayer.setAffineTransform(affineTransform)
-
-            playAndPauseButtonOutlet.transform = CGAffineTransform(rotationAngle: degreeToRadian(360))
-            
-            playerView.transform = CGAffineTransform(rotationAngle: degreeToRadian(360))
+            playerView.transform = CGAffineTransform(rotationAngle: Utils.shared.degreeToRadian(360))
         }
         
         playerView.isHidden = false
@@ -265,12 +276,7 @@ class VideoPlayerController: UIViewController {
     /// This function calls when the device is in landscape mode. It hides all the button and UIView and set the playerViewframe to the main view (To cover entire screen).
     func showVideoInLandscape() {
         if isRotate {
-            let affineTransform = CGAffineTransform(rotationAngle: degreeToRadian(360))
-            playerLayer.setAffineTransform(affineTransform)
-            
-            playAndPauseButtonOutlet.transform = CGAffineTransform(rotationAngle: degreeToRadian(360))
-            
-            playerView.transform = CGAffineTransform(rotationAngle: degreeToRadian(360))
+            playerView.transform = CGAffineTransform(rotationAngle: Utils.shared.degreeToRadian(360))
         }
 
         startButtonOutlet.isHidden = true
@@ -285,7 +291,7 @@ class VideoPlayerController: UIViewController {
     /// This function works when we click the full screen button to enter in full screen mode. It rotates playerView and set the playerView frame to the main view.
     func enterFullScreen() {
         //Rotate the playerView to 90 Degree
-        playerView.transform = CGAffineTransform(rotationAngle: degreeToRadian(90))
+        playerView.transform = CGAffineTransform(rotationAngle: Utils.shared.degreeToRadian(90))
         
         startButtonOutlet.isHidden = true
         self.view.addSubview(self.playerView)
@@ -345,7 +351,6 @@ class VideoPlayerController: UIViewController {
     @objc func playbackSliderValueChanged(_ playbackSlider: UISlider) {
         let seconds: Int64 = Int64(playbackSlider.value)
         let targetTime: CMTime = CMTimeMake(value: seconds, timescale: 1)
-        
         avPlayer.seek(to: targetTime)
     }
     
@@ -359,5 +364,19 @@ class VideoPlayerController: UIViewController {
         }
         let currentTimeInSeconds : Float64 = CMTimeGetSeconds(currentTime)
         return currentTimeInSeconds
+    }
+    
+    // MARK: - Skip Video In Forward
+    func skipTimeForward(seconds: Int64) {
+        let currentTime = getCurrentTimeOfVideo()
+        let targetTime: CMTime = CMTimeMake(value: Int64(currentTime) + seconds, timescale: 1)
+        avPlayer.seek(to: targetTime) // Skip video according to targetTime
+    }
+    
+    // MARK: - Skip Video In Backward
+    func skipTimeBackward(seconds: Int64) {
+        let currentTime = getCurrentTimeOfVideo()
+        let targetTime: CMTime = CMTimeMake(value: Int64(currentTime) - seconds, timescale: 1)
+        avPlayer.seek(to: targetTime) // Skip video according to targetTime
     }
 }

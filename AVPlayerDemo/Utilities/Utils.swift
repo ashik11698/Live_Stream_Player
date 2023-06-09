@@ -41,31 +41,39 @@ class Utils {
             let deviceOrientationRaw = device.orientation.rawValue
             switch deviceOrientationRaw {
             case 1:
-                deviceOrientation = "Portrait"
+                deviceOrientation = Keys.orientation.portrait.rawValue
                 print("Portrait")
             case 2:
-                deviceOrientation = "Upside Down"
+                deviceOrientation = Keys.orientation.upsideDown.rawValue
                 print("Upside Down")
             case 3:
-                deviceOrientation = "Landscape Right"
+                deviceOrientation = Keys.orientation.landscapeRight.rawValue
                 print("Landscape Right")
             case 4:
-                deviceOrientation = "Landscape Left"
+                deviceOrientation = Keys.orientation.landscapeLeft.rawValue
                 print("Landscape Left")
             case 5:
-                deviceOrientation = "Camera Facing Down"
+                deviceOrientation = Keys.orientation.cameraFacingDown.rawValue
                 print("Camera Facing Down")
             case 6:
-                deviceOrientation = "Camera Facing Up"
+                deviceOrientation = Keys.orientation.cameraFacingUp.rawValue
                 print("Camera Facing Up")
             default:
-                deviceOrientation = "Unknown"
+                deviceOrientation = Keys.orientation.unknown.rawValue
                 print("Unknown")
             }
             return deviceOrientation
         } else {
             return nil
         }
+    }
+    
+    // MARK: - Function to convert degree to radian
+    /// This function to convert degree to radian
+    /// - Parameter x: Takes degree as CGFloat
+    /// - Returns: Returns radian value as CGFloat of given degree
+    func degreeToRadian(_ x: CGFloat) -> CGFloat {
+        return .pi * x / 180.0
     }
 }
 
