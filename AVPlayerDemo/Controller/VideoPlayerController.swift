@@ -24,6 +24,8 @@ class VideoPlayerController: UIViewController {
     @IBOutlet weak var speedStackView: UIStackView!
     /// Slider to slide the video
     @IBOutlet weak var slider: UISlider!
+    /// Activity Indicator to show buffer
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     /// Tracks whether the video in rotated or not
     var isRotate = false
@@ -35,6 +37,12 @@ class VideoPlayerController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        activityIndicator.isHidden = true
+        playAndPauseButtonOutlet.isHidden = true
+        fullScreenButtonOutlet.isHidden = true
+        speedStackView.isHidden = true
+        slider.isHidden = true
     }
     
     // MARK: - Executes when phone orientation changes
@@ -49,7 +57,7 @@ class VideoPlayerController: UIViewController {
             guard let self = self else { return }
 
             // Perform any animations or layout-related operations during the transition
-            let orientation = self.deviceOrientation()
+            let orientation = Utils.shared.deviceOrientation()
             if orientation == "Portrait" {
                 self.showVideoInPortrait()
                 self.isRotate = false
@@ -63,6 +71,30 @@ class VideoPlayerController: UIViewController {
             }
         }, completion: nil)
     }
+    
+    // MARK: - Observe Buffering
+    override public func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if keyPath == "timeControlStatus", let change = change, let newValue = change[NSKeyValueChangeKey.newKey] as? Int, let oldValue = change[NSKeyValueChangeKey.oldKey] as? Int {
+            let oldStatus = AVPlayer.TimeControlStatus(rawValue: oldValue)
+            let newStatus = AVPlayer.TimeControlStatus(rawValue: newValue)
+            if newStatus != oldStatus {
+                DispatchQueue.main.async {[weak self] in
+                    if newStatus == .playing || newStatus == .paused {
+                        self?.activityIndicator.stopAnimating()
+                        self?.activityIndicator.isHidden = true
+                        
+                        self?.playAndPauseButtonOutlet.isHidden = false
+                        self?.fullScreenButtonOutlet.isHidden = false
+                        self?.speedStackView.isHidden = false
+                        self?.slider.isHidden = false
+                    } else {
+                        self?.activityIndicator.startAnimating()
+                        self?.activityIndicator.isHidden = false
+                    }
+                }
+            }
+        }
+    }
 
     // MARK: - Starts the video from beginning
     /// This is a button to start a video. Here configures the player and set the frame of playerLayer to an UIView (playerView)
@@ -75,7 +107,8 @@ class VideoPlayerController: UIViewController {
         playAndPauseButtonOutlet.setImage(UIImage(systemName: "pause.fill"), for: .normal)
         
         //let url = Bundle.main.url(forResource: "Sample3", withExtension: "mp4")
-        let url = URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
+        //let url = URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
+        let url = URL(string: "https://devstreaming-cdn.apple.com/videos/wwdc/2023/10187/5/1D820D6D-4F01-48EB-8F22-901F4A4B69FE/cmaf.m3u8")
         
         guard let url = url else {
             print("Video doesn't exist or format issue. Please make sure the correct name of the video and format.")
@@ -85,6 +118,9 @@ class VideoPlayerController: UIViewController {
         avPlayer = AVPlayer(url: url)
         
         playerLayer = AVPlayerLayer(player: avPlayer)
+        
+        // Buffer
+        avPlayer.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
         
         configureSlider()
         
@@ -105,7 +141,10 @@ class VideoPlayerController: UIViewController {
         // Set the slider to playerView
         self.playerView.addSubview(slider)
         
-        playerLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
+        // Set the activity indicator to playerView
+        self.playerView.addSubview(activityIndicator)
+        
+        playerLayer.videoGravity = AVLayerVideoGravity.resizeAspect
         
         // Play the video
         avPlayer.play()
@@ -222,44 +261,6 @@ class VideoPlayerController: UIViewController {
         playerLayer.frame = playerView.bounds
     }
     
-    // MARK: - Checks the orientation of device
-    /// This function is to check the orientation of the ios device
-    /// - Returns: Return the orientation status of device as String
-    func deviceOrientation() -> String! {
-        let device = UIDevice.current
-        if device.isGeneratingDeviceOrientationNotifications {
-            device.beginGeneratingDeviceOrientationNotifications()
-            var deviceOrientation: String
-            let deviceOrientationRaw = device.orientation.rawValue
-            switch deviceOrientationRaw {
-            case 1:
-                deviceOrientation = "Portrait"
-                print("Portrait")
-            case 2:
-                deviceOrientation = "Upside Down"
-                print("Upside Down")
-            case 3:
-                deviceOrientation = "Landscape Right"
-                print("Landscape Right")
-            case 4:
-                deviceOrientation = "Landscape Left"
-                print("Landscape Left")
-            case 5:
-                deviceOrientation = "Camera Facing Down"
-                print("Camera Facing Down")
-            case 6:
-                deviceOrientation = "Camera Facing Up"
-                print("Camera Facing Up")
-            default:
-                deviceOrientation = "Unknown"
-                print("Unknown")
-            }
-            return deviceOrientation
-        } else {
-            return nil
-        }
-    }
-    
     // MARK: - Function to show the video in landscape mode
     /// This function calls when the device is in landscape mode. It hides all the button and UIView and set the playerViewframe to the main view (To cover entire screen).
     func showVideoInLandscape() {
@@ -278,7 +279,7 @@ class VideoPlayerController: UIViewController {
         playerView.translatesAutoresizingMaskIntoConstraints = true
         self.playerView.frame = self.view.bounds
         self.playerLayer.frame = self.playerView.bounds
-        playerLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
+        playerLayer.videoGravity = AVLayerVideoGravity.resizeAspect
     }
     
     /// This function works when we click the full screen button to enter in full screen mode. It rotates playerView and set the playerView frame to the main view.
@@ -291,7 +292,7 @@ class VideoPlayerController: UIViewController {
         playerView.translatesAutoresizingMaskIntoConstraints = true
         self.playerView.frame = self.view.bounds
         self.playerLayer.frame = self.playerView.bounds
-        playerLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
+        playerLayer.videoGravity = AVLayerVideoGravity.resizeAspect
         
         self.isRotate = true
     }
