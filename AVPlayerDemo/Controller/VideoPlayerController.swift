@@ -215,7 +215,7 @@ class VideoPlayerController: UIViewController {
     // MARK: - Set icons of playAndPauseBtnOutlet
     /// This is a button to pause and play video. This can toggle from pause to play and vice versa
     @IBAction func playAndPauseVideo(_ sender: Any) {
-        togglePauseAndPlay(button: playAndPauseButtonOutlet)
+        togglePauseAndPlay()
     }
     
     // MARK: - Speed Button
@@ -317,7 +317,7 @@ class VideoPlayerController: UIViewController {
     }
     
     @objc func pauseMiniPlayer() {
-        togglePauseAndPlay(button: playAndPauseButtonForMiniPlayer)
+        togglePauseAndPlay()
     }
     
     // MARK: - Player View Action
@@ -472,14 +472,16 @@ class VideoPlayerController: UIViewController {
     }
     
     /// Convert play button to pause button and vice versa
-    func togglePauseAndPlay(button: UIButton) {
+    func togglePauseAndPlay() {
         if !isPause {
             avPlayer.pause()
-            button.setImage(UIImage(systemName: "play.fill"), for: .normal)
+            playAndPauseButtonOutlet.setImage(UIImage(systemName: "play.fill"), for: .normal)
+            playAndPauseButtonForMiniPlayer.setImage(UIImage(systemName: "play.fill"), for: .normal)
         }
         else {
             avPlayer.play()
-            button.setImage(UIImage(systemName: "pause.fill"), for: .normal)
+            playAndPauseButtonOutlet.setImage(UIImage(systemName: "pause.fill"), for: .normal)
+            playAndPauseButtonForMiniPlayer.setImage(UIImage(systemName: "pause.fill"), for: .normal)
         }
         isPause = !isPause
     }
