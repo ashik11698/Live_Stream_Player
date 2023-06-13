@@ -30,11 +30,20 @@ class VideoPlayerController: UIViewController {
     @IBOutlet weak var forwardSkipButtonOutlet: UIButton!
     /// To skip the video in backward
     @IBOutlet weak var backwardSkipButtonOutlet: UIButton!
+    /// Mini Player Button Outlet
+    @IBOutlet weak var miniPlayerButtonOutlet: UIButton!
     
     /// Tracks whether the video in rotated or not
     var isRotate = false
     /// Tracks whether the video is paused or playing, because a single button is working for both pause and play
     var isPause = false
+    /// Tracks whether mini player starts or not
+    var isMinimize = false
+    /// Origin of the mini player
+    var minimizedOrigin: CGPoint?
+    
+    var crossButton = UIButton()
+    var playAndPauseButtonForMiniPlayer = UIButton()
 
     var playerLayer = AVPlayerLayer()
     var avPlayer = AVPlayer()
@@ -42,13 +51,19 @@ class VideoPlayerController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        activityIndicator.isHidden = true
-        playAndPauseButtonOutlet.isHidden = true
-        fullScreenButtonOutlet.isHidden = true
-        speedStackView.isHidden = true
-        slider.isHidden = true
-        forwardSkipButtonOutlet.isHidden = true
-        backwardSkipButtonOutlet.isHidden = true
+        // Create Play And Pause Button For MiniPlayer
+        self.playAndPauseButtonForMiniPlayer = UIButton().createButton(
+            tintColor: UIColor.black,
+            title: "",
+            imageName: "pause")
+        
+        // Create Cross Button For MiniPlayer
+        self.crossButton = UIButton().createButton(
+            tintColor: UIColor.black,
+            title: "",
+            imageName: "xmark")
+        
+        hidePlayerControllers()
     }
     
     // MARK: - Executes when phone orientation changes
@@ -67,13 +82,13 @@ class VideoPlayerController: UIViewController {
             if orientation == Keys.orientation.portrait.rawValue {
                 self.showVideoInPortrait()
                 self.isRotate = false
+                self.miniPlayerButtonOutlet.isHidden = false
+                self.hideMiniPlayerButtons()
             }
-            if orientation == Keys.orientation.landscapeRight.rawValue {
+            if orientation == Keys.orientation.landscapeRight.rawValue || orientation == Keys.orientation.landscapeLeft.rawValue {
                 self.showVideoInLandscape()
                 self.isRotate = true
-            }
-            if orientation == Keys.orientation.landscapeLeft.rawValue {
-                self.showVideoInLandscape()
+                self.miniPlayerButtonOutlet.isHidden = true
             }
 
         }, completion: nil)
@@ -90,12 +105,9 @@ class VideoPlayerController: UIViewController {
                         self?.activityIndicator.stopAnimating()
                         self?.activityIndicator.isHidden = true
                         
-                        self?.playAndPauseButtonOutlet.isHidden = false
-                        self?.fullScreenButtonOutlet.isHidden = false
-                        self?.speedStackView.isHidden = false
-                        self?.slider.isHidden = false
-                        self?.forwardSkipButtonOutlet.isHidden = false
-                        self?.backwardSkipButtonOutlet.isHidden = false
+                        if self?.isMinimize == false {
+                            self?.unhidePlayerControllers()
+                        }
                     } else {
                         self?.activityIndicator.startAnimating()
                         self?.activityIndicator.isHidden = false
@@ -114,18 +126,14 @@ class VideoPlayerController: UIViewController {
         
         // Initially the Pause button will be Visisble
         playAndPauseButtonOutlet.setImage(UIImage(systemName: "pause.fill"), for: .normal)
-        
-        //let url = Bundle.main.url(forResource: "Sample3", withExtension: "mp4")
-        //let url = URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
-        let url = URL(string: "https://devstreaming-cdn.apple.com/videos/wwdc/2023/10187/5/1D820D6D-4F01-48EB-8F22-901F4A4B69FE/cmaf.m3u8")
-        
+
+        let url = Urls.m3u8video2
         guard let url = url else {
             print("Video doesn't exist or format issue. Please make sure the correct name of the video and format.")
             return
         }
         
         avPlayer = AVPlayer(url: url)
-        
         playerLayer = AVPlayerLayer(player: avPlayer)
         
         // Buffer
@@ -159,6 +167,9 @@ class VideoPlayerController: UIViewController {
         // Set the backwardSkipButtonOutlet to playerView
         self.playerView.addSubview(backwardSkipButtonOutlet)
         
+        // Set the mini player outlet to playerView
+        self.playerView.addSubview(miniPlayerButtonOutlet)
+        
         playerLayer.videoGravity = AVLayerVideoGravity.resizeAspect
         
         // Play the video
@@ -172,10 +183,13 @@ class VideoPlayerController: UIViewController {
         
         if self.isRotate == false {
             enterFullScreen()
+            self.miniPlayerButtonOutlet.isHidden = true
+            self.hideMiniPlayerButtons()
             print("enterFullScreen")
         }
         else {
             ExitFullScreen()
+            self.miniPlayerButtonOutlet.isHidden = false
             print("ExitFullScreen")
         }
     }
@@ -183,15 +197,7 @@ class VideoPlayerController: UIViewController {
     // MARK: - Set icons of playAndPauseBtnOutlet
     /// This is a button to pause and play video. This can toggle from pause to play and vice versa
     @IBAction func playAndPauseVideo(_ sender: Any) {
-        if !isPause {
-            avPlayer.pause()
-            playAndPauseButtonOutlet.setImage(UIImage(systemName: "play.fill"), for: .normal)
-        }
-        else {
-            avPlayer.play()
-            playAndPauseButtonOutlet.setImage(UIImage(systemName: "pause.fill"), for: .normal)
-        }
-        isPause = !isPause
+        togglePauseAndPlay(button: playAndPauseButtonOutlet)
     }
     
     // MARK: - Speed Button
@@ -247,12 +253,68 @@ class VideoPlayerController: UIViewController {
     
     // MARK: - Forward Skip
     @IBAction func skipVideoInForward(_ sender: Any) {
-        skipTimeForward(seconds: 10)
+        //skipTimeForward(seconds: 10)
+        AVPlayerManager.shared.skipTimeForward(seconds: 10, avPlayer: avPlayer)
     }
     
     // MARK: - Backward Skip
     @IBAction func skipVideoInBackward(_ sender: Any) {
-        skipTimeBackward(seconds: 10)
+        //skipTimeBackward(seconds: 10)
+        AVPlayerManager.shared.skipTimeBackward(seconds: 10, avPlayer: avPlayer)
+    }
+    
+    // MARK: - Mini Player Button
+    @IBAction func startMiniPlayer(_ sender: Any) {
+        UIView.animate(withDuration: 0.3 , animations: {
+            if self.isMinimize == false {
+                self.hidePlayerControllers()
+                self.unhideMiniPlayerButtons()
+                self.startButtonOutlet.isHidden = true
+                
+                (self.crossButton, self.playAndPauseButtonForMiniPlayer) = AVPlayerManager.shared.configureMiniPlayer(
+                    view: self.view,
+                    playerView: self.playerView,
+                    playerLayer: self.playerLayer,
+                    crossButton: self.crossButton,
+                    playAndPauseButtonForMiniPlayer: self.playAndPauseButtonForMiniPlayer,
+                    minimizedOrigin: self.minimizedOrigin,
+                    playAndPauseButtonOutlet: self.playAndPauseButtonOutlet
+                )
+                
+                self.crossButton.addTarget(self, action:#selector(self.closeMiniPlayer), for: .touchUpInside)
+                
+                self.playAndPauseButtonForMiniPlayer.addTarget(self, action:#selector(self.pauseMiniPlayer), for: .touchUpInside)
+                
+                self.isMinimize = true
+            }
+        })
+    }
+    
+    @objc func closeMiniPlayer() {
+        print("Button closeMiniPlayer")
+        UIView.animate(withDuration: 0.3, animations: {
+            self.playerLayer.player?.pause()
+            self.view.frame.origin.x = -self.view.bounds.width - 20
+        })
+    }
+    
+    @objc func pauseMiniPlayer() {
+        togglePauseAndPlay(button: playAndPauseButtonForMiniPlayer)
+    }
+    
+    // MARK: - Player View Action
+    @IBAction func expandMiniPlayerToNormalSize(_ sender: Any) {
+        UIView.animate(withDuration: 0.3, animations: {
+            if self.isMinimize {
+                self.view.backgroundColor = UIColor.white
+                self.unhidePlayerControllers()
+                self.hideMiniPlayerButtons()
+                self.view.bounds = UIScreen.main.bounds
+                self.view.frame.origin = CGPoint.init(x: 0, y: 0)
+                self.showVideoInPortrait()
+                self.isMinimize = false
+            }
+        })
     }
     
     // MARK: - Function to show the video in portrait mode
@@ -336,11 +398,13 @@ class VideoPlayerController: UIViewController {
         slider.tintColor = UIColor.red
         
         let timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            let currentTime = self?.getCurrentTimeOfVideo()
-            self?.slider.setValue(Float(currentTime ?? 0.0), animated: true)
+            guard let avPlayer = self?.avPlayer else {return}
+            let currentTime = Utils.shared.getCurrentTimeOfVideo(avPlayer: avPlayer)
+            
+            self?.slider.setValue(Float(currentTime), animated: true)
         }
         
-        if Float64(slider.maximumValue) == getCurrentTimeOfVideo() {
+        if Float64(slider.maximumValue) == Utils.shared.getCurrentTimeOfVideo(avPlayer: avPlayer) {
             timer.invalidate()
             print("timer.invalidate()")
         }
@@ -354,29 +418,51 @@ class VideoPlayerController: UIViewController {
         avPlayer.seek(to: targetTime)
     }
     
-    // MARK: - getCurrentTimeOfVideo
-    /// This function get the current time and return
-    /// - Returns: returns the current time of video
-    func getCurrentTimeOfVideo() -> Float64 {
-        let currentTime = avPlayer.currentItem?.currentTime()
-        guard let currentTime = currentTime else {
-            return 0.0
+    /// Hides the buttons, stackView, slilder and activity Indicator of player
+    func hidePlayerControllers() {
+        activityIndicator.isHidden = true
+        playAndPauseButtonOutlet.isHidden = true
+        fullScreenButtonOutlet.isHidden = true
+        speedStackView.isHidden = true
+        slider.isHidden = true
+        forwardSkipButtonOutlet.isHidden = true
+        backwardSkipButtonOutlet.isHidden = true
+        miniPlayerButtonOutlet.isHidden = true
+    }
+    
+    /// Unhide the buttons, stackView, slilder and activity Indicator of player
+    func unhidePlayerControllers() {
+        //activityIndicator.isHidden = false
+        playAndPauseButtonOutlet.isHidden = false
+        fullScreenButtonOutlet.isHidden = false
+        speedStackView.isHidden = false
+        slider.isHidden = false
+        forwardSkipButtonOutlet.isHidden = false
+        backwardSkipButtonOutlet.isHidden = false
+        miniPlayerButtonOutlet.isHidden = false
+    }
+    
+    /// Hides the buttons of mini player
+    func hideMiniPlayerButtons() {
+        self.playAndPauseButtonForMiniPlayer.isHidden = true
+        self.crossButton.isHidden = true
+    }
+    
+    func unhideMiniPlayerButtons() {
+        self.playAndPauseButtonForMiniPlayer.isHidden = false
+        self.crossButton.isHidden = false
+    }
+    
+    /// Convert play button to pause button and vice versa
+    func togglePauseAndPlay(button: UIButton) {
+        if !isPause {
+            avPlayer.pause()
+            button.setImage(UIImage(systemName: "play.fill"), for: .normal)
         }
-        let currentTimeInSeconds : Float64 = CMTimeGetSeconds(currentTime)
-        return currentTimeInSeconds
-    }
-    
-    // MARK: - Skip Video In Forward
-    func skipTimeForward(seconds: Int64) {
-        let currentTime = getCurrentTimeOfVideo()
-        let targetTime: CMTime = CMTimeMake(value: Int64(currentTime) + seconds, timescale: 1)
-        avPlayer.seek(to: targetTime) // Skip video according to targetTime
-    }
-    
-    // MARK: - Skip Video In Backward
-    func skipTimeBackward(seconds: Int64) {
-        let currentTime = getCurrentTimeOfVideo()
-        let targetTime: CMTime = CMTimeMake(value: Int64(currentTime) - seconds, timescale: 1)
-        avPlayer.seek(to: targetTime) // Skip video according to targetTime
+        else {
+            avPlayer.play()
+            button.setImage(UIImage(systemName: "pause.fill"), for: .normal)
+        }
+        isPause = !isPause
     }
 }

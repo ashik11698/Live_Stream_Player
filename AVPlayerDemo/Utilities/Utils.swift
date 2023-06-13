@@ -75,5 +75,33 @@ class Utils {
     func degreeToRadian(_ x: CGFloat) -> CGFloat {
         return .pi * x / 180.0
     }
+    
+    // MARK: - Function to center any button inside any UIView
+    /// This function is to set any button in the middle of of any UIView.
+    /// - Parameters:
+    ///   - view: Takes UIView, where the button will be placed (in the middle)
+    ///   - button: Takes button, which will be placed in middle of the given UIView
+    func setButtonCenter(view: UIView, button: UIButton) {
+        view.addSubview(button)
+        button.translatesAutoresizingMaskIntoConstraints = true
+        button.frame = CGRect(
+            x: (view.bounds.width - button.bounds.width) / 2,
+            y: (view.bounds.height - button.bounds.height) / 2,
+            width: button.bounds.width,
+            height: button.bounds.height
+        )
+    }
+    
+    // MARK: - getCurrentTimeOfVideo
+    /// This function get the current time and return
+    /// - Returns: returns the current time of video
+    func getCurrentTimeOfVideo(avPlayer: AVPlayer) -> Float64 {
+        let currentTime = avPlayer.currentItem?.currentTime()
+        guard let currentTime = currentTime else {
+            return 0.0
+        }
+        let currentTimeInSeconds : Float64 = CMTimeGetSeconds(currentTime)
+        return currentTimeInSeconds
+    }
 }
 
