@@ -90,7 +90,6 @@
 		042D90A42A309140005FBC28 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
-				0435059E2A298D68005CBCAE /* UIView+Ext.swift */,
 				04F5ED1D2A32E6EF001309FA /* Utils.swift */,
 			);
 			path = Utilities;
@@ -100,6 +99,7 @@
 			isa = PBXGroup;
 			children = (
 				045C0DC52A38054500A162CE /* UIButton+Ext.swift */,
+				0435059E2A298D68005CBCAE /* UIView+Ext.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
