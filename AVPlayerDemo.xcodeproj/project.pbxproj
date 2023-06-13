@@ -13,6 +13,9 @@
 		045C0DC62A38054500A162CE /* UIButton+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 045C0DC52A38054500A162CE /* UIButton+Ext.swift */; };
 		0467E1872A36BC6900696CAB /* Urls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0467E1862A36BC6900696CAB /* Urls.swift */; };
 		04B890562A2DA032008D7C7D /* AVPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04B890552A2DA032008D7C7D /* AVPlayerManager.swift */; };
+		04C6B4612A3868630095825A /* SeekPreviewDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04C6B45E2A3868630095825A /* SeekPreviewDelegate.swift */; };
+		04C6B4622A3868630095825A /* SeekPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04C6B45F2A3868630095825A /* SeekPreview.swift */; };
+		04C6B4632A3868630095825A /* SeekPreviewAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04C6B4602A3868630095825A /* SeekPreviewAnimator.swift */; };
 		04D491542A28916300490D84 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04D491532A28916300490D84 /* AppDelegate.swift */; };
 		04D491562A28916300490D84 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04D491552A28916300490D84 /* SceneDelegate.swift */; };
 		04D491582A28916300490D84 /* VideoPlayerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04D491572A28916300490D84 /* VideoPlayerController.swift */; };
@@ -30,6 +33,9 @@
 		045C0DC52A38054500A162CE /* UIButton+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIButton+Ext.swift"; sourceTree = "<group>"; };
 		0467E1862A36BC6900696CAB /* Urls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Urls.swift; sourceTree = "<group>"; };
 		04B890552A2DA032008D7C7D /* AVPlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVPlayerManager.swift; sourceTree = "<group>"; };
+		04C6B45E2A3868630095825A /* SeekPreviewDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SeekPreviewDelegate.swift; sourceTree = "<group>"; };
+		04C6B45F2A3868630095825A /* SeekPreview.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SeekPreview.swift; sourceTree = "<group>"; };
+		04C6B4602A3868630095825A /* SeekPreviewAnimator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SeekPreviewAnimator.swift; sourceTree = "<group>"; };
 		04D491502A28916300490D84 /* AVPlayerDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AVPlayerDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		04D491532A28916300490D84 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		04D491552A28916300490D84 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -104,6 +110,16 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		04C6B45D2A38685A0095825A /* SeekPreview */ = {
+			isa = PBXGroup;
+			children = (
+				04C6B45F2A3868630095825A /* SeekPreview.swift */,
+				04C6B4602A3868630095825A /* SeekPreviewAnimator.swift */,
+				04C6B45E2A3868630095825A /* SeekPreviewDelegate.swift */,
+			);
+			path = SeekPreview;
+			sourceTree = "<group>";
+		};
 		04D491472A28916300490D84 = {
 			isa = PBXGroup;
 			children = (
@@ -123,6 +139,7 @@
 		04D491522A28916300490D84 /* AVPlayerDemo */ = {
 			isa = PBXGroup;
 			children = (
+				04C6B45D2A38685A0095825A /* SeekPreview */,
 				045C0DC72A38055700A162CE /* Extensions */,
 				04D5E40F2A3326A800F84D06 /* Models */,
 				042D90A42A309140005FBC28 /* Utilities */,
@@ -219,11 +236,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04C6B4612A3868630095825A /* SeekPreviewDelegate.swift in Sources */,
 				0435059F2A298D68005CBCAE /* UIView+Ext.swift in Sources */,
 				04D491582A28916300490D84 /* VideoPlayerController.swift in Sources */,
 				04F5ED1E2A32E6EF001309FA /* Utils.swift in Sources */,
 				0467E1872A36BC6900696CAB /* Urls.swift in Sources */,
+				04C6B4632A3868630095825A /* SeekPreviewAnimator.swift in Sources */,
 				04B890562A2DA032008D7C7D /* AVPlayerManager.swift in Sources */,
+				04C6B4622A3868630095825A /* SeekPreview.swift in Sources */,
 				045C0DC62A38054500A162CE /* UIButton+Ext.swift in Sources */,
 				045C0DC42A38053800A162CE /* HomeViewController.swift in Sources */,
 				04D5E4112A3326C700F84D06 /* Keys.swift in Sources */,

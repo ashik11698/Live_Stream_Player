@@ -48,6 +48,9 @@ class VideoPlayerController: UIViewController {
     var playerLayer = AVPlayerLayer()
     var avPlayer = AVPlayer()
     
+    let preview = SeekPreview()
+    var images: [ Double : UIImage ] = [:]
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -64,6 +67,12 @@ class VideoPlayerController: UIViewController {
             imageName: "xmark")
         
         hidePlayerControllers()
+        
+        // Preview
+        preview.delegate = self
+        preview.borderColor = UIColor.black
+        preview.borderWidth = 1
+        preview.cornerRadius = 5
     }
     
     // MARK: - Executes when phone orientation changes
@@ -127,7 +136,7 @@ class VideoPlayerController: UIViewController {
         // Initially the Pause button will be Visisble
         playAndPauseButtonOutlet.setImage(UIImage(systemName: "pause.fill"), for: .normal)
 
-        let url = Urls.m3u8video2
+        let url = Urls.m3u8video1
         guard let url = url else {
             print("Video doesn't exist or format issue. Please make sure the correct name of the video and format.")
             return
@@ -169,6 +178,15 @@ class VideoPlayerController: UIViewController {
         
         // Set the mini player outlet to playerView
         self.playerView.addSubview(miniPlayerButtonOutlet)
+        
+        // Set the preview to playerView
+        self.playerView.addSubview(preview)
+        
+        preview.translatesAutoresizingMaskIntoConstraints = false
+        preview.bottomAnchor.constraint(equalTo: self.slider.topAnchor).isActive = true
+        preview.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        preview.attachToSlider(slider: slider)
+        generateImages()
         
         playerLayer.videoGravity = AVLayerVideoGravity.resizeAspect
         
@@ -464,5 +482,38 @@ class VideoPlayerController: UIViewController {
             button.setImage(UIImage(systemName: "pause.fill"), for: .normal)
         }
         isPause = !isPause
+    }
+}
+
+extension VideoPlayerController: SeekPreviewDelegate {
+    func getSeekPreview(value: Float) -> UIImage? {
+        guard let asset = avPlayer.currentItem?.asset else {return nil}
+        
+        print("IMage: ", self.images)
+        let times = images.keys
+        if times.count == 0 {
+            return nil
+        }
+        let seconds = Double(value) * asset.duration.seconds
+        let closest = times.enumerated().min( by: { abs($0.1 - seconds) < abs($1.1 - seconds) } )!
+        let image = images[closest.element]
+        return image
+    }
+    
+    func generateImages() {
+        guard let asset = avPlayer.currentItem?.asset else {
+            return
+        }
+        let imageGenerator = AVAssetImageGenerator(asset: asset)
+        imageGenerator.maximumSize = CGSize(width: 150, height: 80)
+        let seconds = asset.duration.seconds
+        
+        imageGenerator.generateCGImagesAsynchronously(forTimes: Array(1...99).map{ NSValue(time:CMTimeMake(value: $0 * Int64(seconds), timescale: 100))  }) { (requestedTime, cgImage, actualTime, result, error) in
+            if let image = cgImage {
+                DispatchQueue.main.async {
+                    self.images[actualTime.seconds] = UIImage(cgImage: image)
+                }
+            }
+        }
     }
 }
