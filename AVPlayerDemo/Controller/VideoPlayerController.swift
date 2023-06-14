@@ -35,6 +35,8 @@ class VideoPlayerController: UIViewController {
     
     /// Tracks whether the video in rotated or not
     var isRotate = false
+    /// Tracks the orientation of device
+    var isLandscape = false
     /// Tracks whether the video is paused or playing, because a single button is working for both pause and play
     var isPause = false
     /// Tracks whether mini player starts or not
@@ -86,6 +88,11 @@ class VideoPlayerController: UIViewController {
     }
     
     
+    override func viewWillAppear(_ animated: Bool) {
+        print("viewWillAppear")
+    }
+
+    
     // MARK: - Executes when phone orientation changes
     /// This is to observe the phone orientation
     /// - Parameters:
@@ -101,14 +108,18 @@ class VideoPlayerController: UIViewController {
             // Perform any animations or layout-related operations during the transition
             let orientation = Utils.shared.deviceOrientation()
             if orientation == Orientation.portrait.rawValue {
+                print("portrait")
                 self.showVideoInPortrait()
                 self.isRotate = false
+                self.isLandscape = false
                 self.miniPlayerButtonOutlet.isHidden = false
                 self.hideMiniPlayerButtons()
             }
             if orientation == Orientation.landscapeRight.rawValue || orientation == Orientation.landscapeLeft.rawValue {
+                print("landscape")
                 self.showVideoInLandscape()
                 self.isRotate = true
+                self.isLandscape = true
                 self.miniPlayerButtonOutlet.isHidden = true
             }
 
@@ -349,7 +360,6 @@ class VideoPlayerController: UIViewController {
     
     @objc func closeMiniPlayer() {
         
-        print("Button closeMiniPlayer")
         UIView.animate(withDuration: 0.3, animations: {
             self.playerLayer.player?.pause()
             self.view.frame.origin.x = -self.view.bounds.width - 20
@@ -413,9 +423,10 @@ class VideoPlayerController: UIViewController {
         startButtonOutlet.isHidden = false
 
         let width = view.bounds.width - 10
+        let height = view.bounds.height/2 - 70
         self.view.addSubview(self.playerView)
         playerView.translatesAutoresizingMaskIntoConstraints = true
-        playerView.frame = CGRect(x: 5, y: 60, width: width, height: 200)
+        playerView.frame = CGRect(x: 5, y: 60, width: width, height: height)
         playerLayer.frame = playerView.bounds
         
     }
@@ -444,8 +455,16 @@ class VideoPlayerController: UIViewController {
     /// This function works when we click the full screen button to enter in full screen mode. It rotates playerView and set the playerView frame to the main view.
     func enterFullScreen() {
         
-        //Rotate the playerView to 90 Degree
-        playerView.transform = CGAffineTransform(rotationAngle: Utils.shared.degreeToRadian(90))
+        if self.isLandscape == true {
+            print("isRotate")
+            //Rotate the playerView to 360 Degree
+            playerView.transform = CGAffineTransform(rotationAngle: Utils.shared.degreeToRadian(360))
+        }
+        else {
+            print("Not isRotate")
+            //Rotate the playerView to 90 Degree
+            playerView.transform = CGAffineTransform(rotationAngle: Utils.shared.degreeToRadian(90))
+        }
         
         startButtonOutlet.isHidden = true
         
@@ -465,6 +484,11 @@ class VideoPlayerController: UIViewController {
     /// This function calls when we are in portrait mode.
     func ExitFullScreen() {
         
+        if isLandscape {
+            changeDeviceOrientation(to: .portrait)
+            
+        }
+
         showVideoInPortrait()
         self.isRotate = false
         
@@ -555,7 +579,12 @@ class VideoPlayerController: UIViewController {
         slider.isHidden = false
         forwardSkipButtonOutlet.isHidden = false
         backwardSkipButtonOutlet.isHidden = false
-        miniPlayerButtonOutlet.isHidden = false
+        if isLandscape || isRotate {
+            miniPlayerButtonOutlet.isHidden = true
+        }
+        else {
+            miniPlayerButtonOutlet.isHidden = false
+        }
         preview.alpha = 1
         
     }
@@ -614,6 +643,13 @@ class VideoPlayerController: UIViewController {
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(seconds), execute: workItem!)
         
+    }
+    
+    
+    /// This function change the current orientation of device
+    /// - Parameter orientation: desired orientation
+    func changeDeviceOrientation(to orientation: UIDeviceOrientation) {
+        UIDevice.current.setValue(orientation.rawValue, forKey: "orientation")
     }
     
     

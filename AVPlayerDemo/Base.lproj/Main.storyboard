@@ -18,7 +18,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Lfq-G7-Grt">
-                                <rect key="frame" x="146.66666666666666" y="356" width="100" height="50"/>
+                                <rect key="frame" x="146.66666666666666" y="309" width="100" height="50"/>
                                 <color key="backgroundColor" systemColor="systemOrangeColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="50" id="aVQ-Er-Eqi"/>
@@ -32,10 +32,10 @@
                                 </connections>
                             </button>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="faY-67-he5">
-                                <rect key="frame" x="10" y="126" width="373" height="180"/>
+                                <rect key="frame" x="10" y="79" width="373" height="180"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uBz-r0-31G">
-                                        <rect key="frame" x="8" y="137.66666666666669" width="49" height="34.333333333333343"/>
+                                        <rect key="frame" x="8" y="137.66666666666666" width="49" height="34.333333333333343"/>
                                         <color key="tintColor" systemColor="systemRedColor"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" image="square.dashed" catalog="system" title=""/>
@@ -184,7 +184,7 @@
                         <constraints>
                             <constraint firstItem="faY-67-he5" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="10" id="OCD-wr-tBy"/>
                             <constraint firstItem="Lfq-G7-Grt" firstAttribute="top" secondItem="faY-67-he5" secondAttribute="bottom" constant="50" id="YXL-x5-jN7"/>
-                            <constraint firstItem="faY-67-he5" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="67" id="kUV-Ym-zYJ"/>
+                            <constraint firstItem="faY-67-he5" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="20" id="kUV-Ym-zYJ"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="faY-67-he5" secondAttribute="trailing" constant="10" id="quC-CH-Ti6"/>
                             <constraint firstItem="Lfq-G7-Grt" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="wER-CU-S77"/>
                         </constraints>
