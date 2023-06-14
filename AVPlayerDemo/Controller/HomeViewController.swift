@@ -16,9 +16,12 @@ class HomeViewController: UIViewController {
     }
     
     @IBAction func goToVideoPlayerController(_ sender: Any) {
+        
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         self.videoPlayerController = storyboard.instantiateViewController(withIdentifier: "VideoPlayerVC") as? VideoPlayerController
+        
         self.videoPlayerController?.view.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+        
         self.view.addSubview(self.videoPlayerController!.view)
         self.addChild(self.videoPlayerController!)
         
@@ -26,7 +29,9 @@ class HomeViewController: UIViewController {
             let x = 0.0
             let y = UIScreen.main.bounds.height - (UIScreen.main.bounds.width * 9 / 25)
             let coordinate = CGPoint.init(x: x, y: y)
+            
             return coordinate
         }()
+        
     }
 }
