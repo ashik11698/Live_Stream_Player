@@ -86,14 +86,14 @@ class AVPlayerManager {
         let x = (Int(view.bounds.width - playerView.bounds.width) - Int(buttonWidth)) / 2 + Int(playerView.bounds.width)
         
         playAndPauseButtonForMiniPlayer.frame = CGRect(
-            x: x,
+            x: x - 20,
             y: (Int(view.bounds.height) - buttonHeight) / 2,
             width: Int(buttonWidth),
             height: Int(buttonHeight)
         )
         
         crossButton.frame = CGRect(
-            x: x + 30,
+            x: x + 35,
             y: (Int(view.bounds.height) - buttonHeight) / 2,
             width: Int(buttonWidth),
             height: Int(buttonHeight)

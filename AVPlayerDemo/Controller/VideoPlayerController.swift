@@ -85,13 +85,21 @@ class VideoPlayerController: UIViewController {
         let gesture = UITapGestureRecognizer(target: self, action:  #selector (self.playerViewTouchGesture (_:)))
         playerView.addGestureRecognizer(gesture)
         
+        // When app become active from background
+        NotificationCenter.default.addObserver(self, selector: #selector(self.activeFromBackground), name: UIApplication.didBecomeActiveNotification, object: nil)
+        
     }
     
-    
-    override func viewWillAppear(_ animated: Bool) {
-        print("viewWillAppear")
-    }
+    /// Executes this function when app comes from background to foreground
+    @objc func activeFromBackground() {
 
+        playAndPauseButtonOutlet.setImage(UIImage(systemName: "play.fill"), for: .normal)
+        
+        playAndPauseButtonForMiniPlayer.setImage(UIImage(systemName: "play.fill"), for: .normal)
+        
+        isPause = !isPause
+        
+    }
     
     // MARK: - Executes when phone orientation changes
     /// This is to observe the phone orientation
