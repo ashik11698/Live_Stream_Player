@@ -107,4 +107,16 @@ class AVPlayerManager {
     }
     
     
+    // MARK: - Set Speed to AVPlayer
+    /// This functions sets the speed of avPlayer
+    /// - Parameter rate: In which speed the avPlayer should play
+    func setSpeedToAVPlayer(rate: Float, avPlayer: AVPlayer) {
+        
+        avPlayer.currentItem?.audioTimePitchAlgorithm = .timeDomain
+        avPlayer.play()
+        avPlayer.rate = rate // In this rate (speed) the video will play
+        
+    }
+    
+    
 }

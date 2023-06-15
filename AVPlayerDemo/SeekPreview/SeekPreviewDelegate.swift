@@ -13,7 +13,7 @@ import UIKit
  *
  * N.B. You can implement preview images loading as you want, but we suggest you to do it in advance because we will require them synchronously on the main thread
  */
-@objc public protocol SeekPreviewDelegate: class {
+@objc public protocol SeekPreviewDelegate: AnyObject {
     /**
      * A method used to request the preview for a specific value.
      *

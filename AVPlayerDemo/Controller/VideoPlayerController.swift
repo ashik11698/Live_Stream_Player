@@ -18,10 +18,6 @@ class VideoPlayerController: UIViewController {
     @IBOutlet weak var startButtonOutlet: UIButton!
     /// This is a button outlet, which can control play and pause both
     @IBOutlet weak var playAndPauseButtonOutlet: UIButton!
-    /// This is the array of speed buttons. E.g., 0.75x, 1x, 1.5x, 2x, etc
-    @IBOutlet var speedsButtonOutlet: [UIButton]!
-    /// Speed StackView. All the speed buttons are inside it
-    @IBOutlet weak var speedStackView: UIStackView!
     /// Slider to slide the video
     @IBOutlet weak var slider: UISlider!
     /// Activity Indicator to show buffer
@@ -34,6 +30,8 @@ class VideoPlayerController: UIViewController {
     @IBOutlet weak var miniPlayerButtonOutlet: UIButton!
     /// Player Time/Duration Outlet
     @IBOutlet weak var playerTime: UILabel!
+    /// Player settings Outlet
+    @IBOutlet weak var settingButtonOutlet: UIButton!
     
     /// Tracks whether the video in rotated or not
     var isRotate = false
@@ -45,6 +43,7 @@ class VideoPlayerController: UIViewController {
     var isMinimize = false
     /// Tracks the buffer
     var isBuffering = false
+    
     /// Origin of the mini player
     var minimizedOrigin: CGPoint?
     
@@ -58,6 +57,8 @@ class VideoPlayerController: UIViewController {
     var images: [ Double : UIImage ] = [:]
     
     var workItem: DispatchWorkItem?
+    
+    var timer = Timer()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -91,8 +92,20 @@ class VideoPlayerController: UIViewController {
         
         // When app become active from background
         NotificationCenter.default.addObserver(self, selector: #selector(self.activeFromBackground), name: UIApplication.didBecomeActiveNotification, object: nil)
-        
+
+        // Observe if video is finished or not
+        NotificationCenter.default.addObserver(self, selector:#selector(self.playerDidFinishPlaying(note:)),name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: avPlayer.currentItem)
     }
+    
+    @objc func playerDidFinishPlaying(note: NSNotification){
+        print("Video Finished")
+        
+        let url = Urls.BigBuckBunny
+        playVideo(url: url)
+        
+        timer.invalidate()
+    }
+    
     
     /// Executes this function when app comes from background to foreground
     @objc func activeFromBackground() {
@@ -173,72 +186,8 @@ class VideoPlayerController: UIViewController {
     /// This is a button to start a video. Here configures the player and set the frame of playerLayer to an UIView (playerView)
     @IBAction func startVideo(_ sender: Any) {
         
-        // Remove playerLayer from its parent layer
-        playerLayer.removeFromSuperlayer()
-        playerLayer.player = nil
-        
-        // Initially the Pause button will be Visisble
-        playAndPauseButtonOutlet.setImage(UIImage(systemName: "pause.fill"), for: .normal)
-
         let url = Urls.m3u8Video1
-        guard let url = url else {
-            print("Video doesn't exist or format issue. Please make sure the correct name of the video and format.")
-            return
-        }
-        
-        avPlayer = AVPlayer(url: url)
-        playerLayer = AVPlayerLayer(player: avPlayer)
-        
-        // Buffer
-        avPlayer.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
-        
-        configureSlider(color: UIColor.red)
-        
-        self.playerView.layer.addSublayer(playerLayer)
-        
-        // Set the frame of the player Layer according to the playerView bound
-        playerLayer.frame = self.playerView.layer.bounds
-        
-        // Set the full Screen Button to playerView
-        self.playerView.addSubview(fullScreenButtonOutlet)
-        
-        // Set the play Button to playerView
-        self.playerView.addSubview(playAndPauseButtonOutlet)
-        
-        // Set the speed stackView to playerView
-        self.playerView.addSubview(speedStackView)
-        
-        // Set the slider to playerView
-        self.playerView.addSubview(slider)
-        
-        // Set the activity indicator to playerView
-        self.playerView.addSubview(activityIndicator)
-        
-        // Set the forwardSkipButtonOutlet to playerView
-        self.playerView.addSubview(forwardSkipButtonOutlet)
-        
-        // Set the backwardSkipButtonOutlet to playerView
-        self.playerView.addSubview(backwardSkipButtonOutlet)
-        
-        // Set the mini player outlet to playerView
-        self.playerView.addSubview(miniPlayerButtonOutlet)
-        
-        // Set the preview to playerView
-        self.playerView.addSubview(preview)
-        
-        // Set the player time to playerView
-        self.playerView.addSubview(playerTime)
-        
-        preview.translatesAutoresizingMaskIntoConstraints = false
-        preview.bottomAnchor.constraint(equalTo: self.slider.topAnchor).isActive = true
-        preview.heightAnchor.constraint(equalToConstant: 40).isActive = true
-        preview.attachToSlider(slider: slider)
-        generateImages()
-        
-        playerLayer.videoGravity = AVLayerVideoGravity.resizeAspect
-        
-        // Play the video
-        avPlayer.play()
+        playVideo(url: url)
         
     }
     
@@ -269,60 +218,6 @@ class VideoPlayerController: UIViewController {
     @IBAction func playAndPauseVideo(_ sender: Any) {
         
         togglePauseAndPlay()
-    }
-    
-    
-    // MARK: - Speed Button
-    /// By clicking it, all the speed option will be visible and invisible
-    @IBAction func selectSpeed(_ sender: Any) {
-        
-        speedsButtonOutlet.forEach { button in
-            UIView.animate(withDuration: 0.3) {
-                button.isHidden = !button.isHidden
-                self.view.layoutIfNeeded()
-            }
-        }
-        
-    }
-    
-    
-    // MARK: - Speed 0.1x
-    @IBAction func setSpeed0Point1x(_ sender: Any) {
-        
-        setSpeedToAVPlayer(rate: 0.1)
-        
-    }
-    
-    
-    // MARK: - Speed Normal (1.0x)
-    @IBAction func setSpeedNormal(_ sender: Any) {
-        
-        setSpeedToAVPlayer(rate: 1)
-        
-    }
-    
-    
-    // MARK: - Speed 2x
-    @IBAction func setSpeed2x(_ sender: Any) {
-        
-        setSpeedToAVPlayer(rate: 2.0)
-        
-    }
-    
-    
-    // MARK: - Speed 4x
-    @IBAction func setSpeed4x(_ sender: Any) {
-        
-        setSpeedToAVPlayer(rate: 4.0)
-        
-    }
-    
-    
-    // MARK: - Speed 6x
-    @IBAction func setSpeed6x(_ sender: Any) {
-        
-        setSpeedToAVPlayer(rate: 6.0)
-        
     }
     
     
@@ -375,6 +270,40 @@ class VideoPlayerController: UIViewController {
     }
     
     
+    // MARK: - Settings button to open Action Sheet
+    @IBAction func SettingsToShowActionSheet(_ sender: Any) {
+        
+        let alert = UIAlertController(title: "Settings", message: "Select any", preferredStyle: .actionSheet)
+        
+        alert.addAction(UIAlertAction(title: "Video Speed", style: .default , handler:{ _ in
+            let speedAlert = ActionSheet.shared.speedActionSheet(avPlayer: self.avPlayer)
+            
+            self.present(speedAlert, animated: true, completion: {
+                print("completion block")
+            })
+        }))
+        
+        alert.addAction(UIAlertAction(title: "Video Quality", style: .default , handler:{ (UIAlertAction)in
+            
+        }))
+
+        alert.addAction(UIAlertAction(title: "Report", style: .destructive , handler:{ (UIAlertAction)in
+            
+        }))
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler:{ (UIAlertAction)in
+            
+        }))
+        
+        //uncomment for iPad Support
+        //alert.popoverPresentationController?.sourceView = self.view
+
+        self.present(alert, animated: true, completion: {
+            print("completion block")
+        })
+        
+    }
+    
     @objc func closeMiniPlayer() {
         
         UIView.animate(withDuration: 0.3, animations: {
@@ -404,6 +333,8 @@ class VideoPlayerController: UIViewController {
         // Touch gesture to invisible the buttons after 5 seconds and visible when it touched
         unhidePlayerControllers() // Unhide buttons when playerView touched
         
+        changeOpacityOfPlayerLayer(opacity: 0.5) // change opacity of payerLayer
+        
         hideButtonsAfterCertainTime(seconds: 5) // Hide buttons after 5 seconds
         
     }
@@ -416,15 +347,109 @@ class VideoPlayerController: UIViewController {
     }
     
     
-    /// This functions sets the speed of avPlayer
-    /// - Parameter rate: In which speed the avPlayer should play
-    func setSpeedToAVPlayer(rate: Float) {
+//    func speedActionSheet() {
+//        
+//        let speedAlert = UIAlertController(title: "Video Speed", message: "Select any", preferredStyle: .actionSheet)
+//        
+//        speedAlert.addAction(UIAlertAction(title: "6x", style: .default , handler:{ (UIAlertAction)in
+//            AVPlayerManager.shared.setSpeedToAVPlayer(rate: 6.0, avPlayer: self.avPlayer)
+//        }))
+//        
+//        speedAlert.addAction(UIAlertAction(title: "4x", style: .default , handler:{ (UIAlertAction)in
+//            AVPlayerManager.shared.setSpeedToAVPlayer(rate: 4.0, avPlayer: self.avPlayer)
+//        }))
+//
+//        speedAlert.addAction(UIAlertAction(title: "2x", style: .default , handler:{ (UIAlertAction)in
+//            AVPlayerManager.shared.setSpeedToAVPlayer(rate: 2.0, avPlayer: self.avPlayer)
+//        }))
+//        
+//        speedAlert.addAction(UIAlertAction(title: "Normal", style: .default, handler:{ [self] (UIAlertAction)in
+//            AVPlayerManager.shared.setSpeedToAVPlayer(rate: 1.0, avPlayer: self.avPlayer)
+//        }))
+//        
+//        speedAlert.addAction(UIAlertAction(title: "0.1x", style: .default, handler:{ (UIAlertAction)in
+//            AVPlayerManager.shared.setSpeedToAVPlayer(rate: 0.1, avPlayer: self.avPlayer)
+//        }))
+//        
+//        //uncomment for iPad Support
+//        //alert.popoverPresentationController?.sourceView = self.view
+//
+//        self.present(speedAlert, animated: true, completion: {
+//            print("completion block")
+//        })
+//    }
+    
+    
+    // MARK: - Plays the video from beginning
+    /// This is a function to start a video for a specific url. Here configures the player and set the frame of playerLayer to an UIView (playerView)
+    func playVideo(url: URL?) {
         
-        avPlayer.currentItem?.audioTimePitchAlgorithm = .timeDomain
+        // Remove playerLayer from its parent layer
+        playerLayer.removeFromSuperlayer()
+        playerLayer.player = nil
+        
+        // Initially the Pause button will be Visisble
+        playAndPauseButtonOutlet.setImage(UIImage(systemName: "pause.fill"), for: .normal)
+
+        let url = url
+        guard let url = url else {
+            print("Video doesn't exist or format issue. Please make sure the correct name of the video and format.")
+            return
+        }
+        
+        avPlayer = AVPlayer(url: url)
+        playerLayer = AVPlayerLayer(player: avPlayer)
+        
+        // Buffer
+        avPlayer.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
+        
+        configureSlider(color: UIColor.red)
+        
+        self.playerView.layer.addSublayer(playerLayer)
+        
+        // Set the frame of the player Layer according to the playerView bound
+        playerLayer.frame = self.playerView.layer.bounds
+        
+        // Set the full Screen Button to playerView
+        self.playerView.addSubview(fullScreenButtonOutlet)
+        
+        // Set the play Button to playerView
+        self.playerView.addSubview(playAndPauseButtonOutlet)
+        
+        // Set the slider to playerView
+        self.playerView.addSubview(slider)
+        
+        // Set the activity indicator to playerView
+        self.playerView.addSubview(activityIndicator)
+        
+        // Set the forwardSkipButtonOutlet to playerView
+        self.playerView.addSubview(forwardSkipButtonOutlet)
+        
+        // Set the backwardSkipButtonOutlet to playerView
+        self.playerView.addSubview(backwardSkipButtonOutlet)
+        
+        // Set the mini player outlet to playerView
+        self.playerView.addSubview(miniPlayerButtonOutlet)
+        
+        // Set the preview to playerView
+        self.playerView.addSubview(preview)
+        
+        // Set the player time to playerView
+        self.playerView.addSubview(playerTime)
+        
+        // Set the settings to playerView
+        self.playerView.addSubview(settingButtonOutlet)
+        
+        preview.translatesAutoresizingMaskIntoConstraints = false
+        preview.bottomAnchor.constraint(equalTo: self.slider.topAnchor).isActive = true
+        preview.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        preview.attachToSlider(slider: slider)
+        generateImages()
+        
+        playerLayer.videoGravity = AVLayerVideoGravity.resizeAspect
+        
+        // Play the video
         avPlayer.play()
-        avPlayer.rate = rate // In this rate (speed) the video will play
-        hideSpeedButton()
-        
     }
     
     
@@ -512,20 +537,6 @@ class VideoPlayerController: UIViewController {
     }
     
     
-    // MARK: - Hide Speed Button
-    /// This function hides the speed options when we tap any one of them
-    func hideSpeedButton() {
-        
-        speedsButtonOutlet.forEach { button in
-            UIView.animate(withDuration: 0.3) {
-                button.isHidden = true
-                self.view.layoutIfNeeded()
-            }
-        }
-        
-    }
-    
-    
     // MARK: - Configure the Slider
     /// Did all the tasks of slider here
     func configureSlider(color: UIColor) {
@@ -543,7 +554,7 @@ class VideoPlayerController: UIViewController {
         slider.isContinuous = true
         slider.tintColor = color
         
-        let timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             
             guard let avPlayer = self?.avPlayer else {
                 return
@@ -558,11 +569,6 @@ class VideoPlayerController: UIViewController {
                 
                 self?.slider.setValue(Float(currentTime), animated: true)
             }
-        }
-
-        if Float64(slider.maximumValue) == Utils.shared.getCurrentTimeOfVideo(avPlayer: avPlayer) {
-            timer.invalidate()
-            print("timer.invalidate()")
         }
         
         slider.addTarget(self, action: #selector(self.playbackSliderValueChanged(_:)), for: .valueChanged)
@@ -589,13 +595,15 @@ class VideoPlayerController: UIViewController {
         activityIndicator.isHidden = true
         playAndPauseButtonOutlet.isHidden = true
         fullScreenButtonOutlet.isHidden = true
-        speedStackView.isHidden = true
         slider.isHidden = true
         forwardSkipButtonOutlet.isHidden = true
         backwardSkipButtonOutlet.isHidden = true
         miniPlayerButtonOutlet.isHidden = true
         playerTime.isHidden = true
+        settingButtonOutlet.isHidden = true
         preview.alpha = 0
+        
+        changeOpacityOfPlayerLayer(opacity: 1.0) // change opacitiy of player
         
     }
     
@@ -606,7 +614,6 @@ class VideoPlayerController: UIViewController {
         
         playAndPauseButtonOutlet.isHidden = false
         fullScreenButtonOutlet.isHidden = false
-        speedStackView.isHidden = false
         slider.isHidden = false
         forwardSkipButtonOutlet.isHidden = false
         backwardSkipButtonOutlet.isHidden = false
@@ -617,7 +624,10 @@ class VideoPlayerController: UIViewController {
             miniPlayerButtonOutlet.isHidden = false
         }
         playerTime.isHidden = false
+        settingButtonOutlet.isHidden = false
         preview.alpha = 1
+        
+        changeOpacityOfPlayerLayer(opacity: 0.5) // change opacitiy of player
         
     }
     
@@ -672,6 +682,7 @@ class VideoPlayerController: UIViewController {
         
         workItem = DispatchWorkItem {
             self.hidePlayerControllers()
+            self.changeOpacityOfPlayerLayer(opacity: 1.0)
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(seconds), execute: workItem!)
         
@@ -691,6 +702,13 @@ class VideoPlayerController: UIViewController {
         let time = Utils.shared.secondsToHoursMinutesSeconds(Int(sliderValue))
 
         playerTime.text = time
+    }
+    
+    func changeOpacityOfPlayerLayer(opacity: Float) {
+        
+        let desiredOpacity: Float = opacity
+
+        playerLayer.opacity = desiredOpacity
     }
     
     
