@@ -41,6 +41,8 @@ class VideoPlayerController: UIViewController {
     var isPause = false
     /// Tracks whether mini player starts or not
     var isMinimize = false
+    /// Tracks the buffer
+    var isBuffering = false
     /// Origin of the mini player
     var minimizedOrigin: CGPoint?
     
@@ -152,9 +154,12 @@ class VideoPlayerController: UIViewController {
                             self?.unhidePlayerControllers()
                             self?.hideButtonsAfterCertainTime(seconds: 5)
                         }
-                    } else {
+                        self?.isBuffering = false
+                    }
+                    else {
                         self?.activityIndicator.startAnimating()
                         self?.activityIndicator.isHidden = false
+                        self?.isBuffering = true
                     }
                 }
             }
@@ -537,10 +542,11 @@ class VideoPlayerController: UIViewController {
         let timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             guard let avPlayer = self?.avPlayer else {return}
             let currentTime = Utils.shared.getCurrentTimeOfVideo(avPlayer: avPlayer)
-            
-            self?.slider.setValue(Float(currentTime), animated: true)
+            if self?.isBuffering == false {
+                self?.slider.setValue(Float(currentTime), animated: true)
+            }
         }
-        
+
         if Float64(slider.maximumValue) == Utils.shared.getCurrentTimeOfVideo(avPlayer: avPlayer) {
             timer.invalidate()
             print("timer.invalidate()")
