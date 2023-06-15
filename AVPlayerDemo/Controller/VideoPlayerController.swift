@@ -32,6 +32,8 @@ class VideoPlayerController: UIViewController {
     @IBOutlet weak var backwardSkipButtonOutlet: UIButton!
     /// Mini Player Button Outlet
     @IBOutlet weak var miniPlayerButtonOutlet: UIButton!
+    /// Player Time/Duration Outlet
+    @IBOutlet weak var playerTime: UILabel!
     
     /// Tracks whether the video in rotated or not
     var isRotate = false
@@ -164,7 +166,6 @@ class VideoPlayerController: UIViewController {
                 }
             }
         }
-        
     }
 
     
@@ -191,7 +192,7 @@ class VideoPlayerController: UIViewController {
         // Buffer
         avPlayer.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
         
-        configureSlider()
+        configureSlider(color: UIColor.red)
         
         self.playerView.layer.addSublayer(playerLayer)
         
@@ -224,6 +225,9 @@ class VideoPlayerController: UIViewController {
         
         // Set the preview to playerView
         self.playerView.addSubview(preview)
+        
+        // Set the player time to playerView
+        self.playerView.addSubview(playerTime)
         
         preview.translatesAutoresizingMaskIntoConstraints = false
         preview.bottomAnchor.constraint(equalTo: self.slider.topAnchor).isActive = true
@@ -524,7 +528,7 @@ class VideoPlayerController: UIViewController {
     
     // MARK: - Configure the Slider
     /// Did all the tasks of slider here
-    func configureSlider() {
+    func configureSlider(color: UIColor) {
         
         slider.minimumValue = 0
         let duration = self.avPlayer.currentItem?.asset.duration
@@ -537,12 +541,21 @@ class VideoPlayerController: UIViewController {
         
         slider.maximumValue = Float(seconds)
         slider.isContinuous = true
-        slider.tintColor = UIColor.red
+        slider.tintColor = color
         
         let timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            guard let avPlayer = self?.avPlayer else {return}
+            
+            guard let avPlayer = self?.avPlayer else {
+                return
+            }
+            
             let currentTime = Utils.shared.getCurrentTimeOfVideo(avPlayer: avPlayer)
+            
             if self?.isBuffering == false {
+                
+                // Sets the value of slider to playerTime label
+                self?.setPlayerTime()
+                
                 self?.slider.setValue(Float(currentTime), animated: true)
             }
         }
@@ -563,6 +576,9 @@ class VideoPlayerController: UIViewController {
         let targetTime: CMTime = CMTimeMake(value: seconds, timescale: 1)
         avPlayer.seek(to: targetTime)
         
+        // Sets the value of slider to playerTime label
+        setPlayerTime()
+        
     }
     
     
@@ -578,6 +594,7 @@ class VideoPlayerController: UIViewController {
         forwardSkipButtonOutlet.isHidden = true
         backwardSkipButtonOutlet.isHidden = true
         miniPlayerButtonOutlet.isHidden = true
+        playerTime.isHidden = true
         preview.alpha = 0
         
     }
@@ -599,6 +616,7 @@ class VideoPlayerController: UIViewController {
         else {
             miniPlayerButtonOutlet.isHidden = false
         }
+        playerTime.isHidden = false
         preview.alpha = 1
         
     }
@@ -664,6 +682,15 @@ class VideoPlayerController: UIViewController {
     /// - Parameter orientation: desired orientation
     func changeDeviceOrientation(to orientation: UIDeviceOrientation) {
         UIDevice.current.setValue(orientation.rawValue, forKey: "orientation")
+    }
+    
+    
+    /// This function sets the duration of the video (slider value) to playerTime label
+    func setPlayerTime() {
+        let sliderValue = slider.value
+        let time = Utils.shared.secondsToHoursMinutesSeconds(Int(sliderValue))
+
+        playerTime.text = time
     }
     
     

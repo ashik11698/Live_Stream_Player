@@ -137,6 +137,20 @@ class Utils {
         
     }
     
+    /// Convert seconds to HH:MM:SS format
+    /// - Parameter seconds: Takes seconds as integer
+    /// - Returns: returns the time in HH:MM:SS format
+    func secondsToHoursMinutesSeconds(_ seconds: Int) -> String {
+        let hour = (seconds / 3600)
+        let minute = (seconds % 3600) / 60
+        let second = (seconds % 3600) % 60
+        
+        let timeInString = "\(hour):\(minute):\(second)"
+        
+        return timeInString
+        
+    }
+
     
 }
 
