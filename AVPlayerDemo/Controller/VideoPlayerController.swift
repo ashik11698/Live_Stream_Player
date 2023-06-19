@@ -32,6 +32,17 @@ class VideoPlayerController: UIViewController {
     @IBOutlet weak var playerTime: UILabel!
     /// Player settings Outlet
     @IBOutlet weak var settingButtonOutlet: UIButton!
+    /// Shows the total duration/time of the video
+    @IBOutlet weak var playerTotalDuration: UILabel!
+    /// ProgressView for live
+    @IBOutlet weak var progressView: UIProgressView!
+    /// Image of live red Circle
+    @IBOutlet weak var liveRedCircleImage: UIImageView!
+    /// Label for live
+    @IBOutlet weak var liveLabel: UILabel!
+    /// Stack of live label and red circle image
+    @IBOutlet weak var liveStack: UIStackView!
+    
     
     /// Tracks whether the video in rotated or not
     var isRotate = false
@@ -56,14 +67,24 @@ class VideoPlayerController: UIViewController {
     let preview = SeekPreview()
     var images: [ Double : UIImage ] = [:]
     
+    /// For hiding button after a certain time (5 seconds)
     var workItem: DispatchWorkItem?
     
+    /// Timer for slider to move continuously
     var timer = Timer()
+    
+    /// To store the height of playerView as it change it's height for different orientation of device
+    var playerViewHeight: CGFloat?
+    
+    /// Tracks whether live stream is on or off
+    var isLiveStream = true
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Hide the buttons of playerView after 5 seconds
+        playerViewHeight = playerView.bounds.height
+        
+        // Hide the buttons of playerView
         hidePlayerControllers()
         
         // Create Play And Pause Button For MiniPlayer
@@ -137,8 +158,8 @@ class VideoPlayerController: UIViewController {
                 self.showVideoInPortrait()
                 self.isRotate = false
                 self.isLandscape = false
-                self.miniPlayerButtonOutlet.isHidden = false
                 self.hideMiniPlayerButtons()
+                self.hidePlayerControllers()
             }
             if orientation == Orientation.landscapeRight.rawValue || orientation == Orientation.landscapeLeft.rawValue {
                 print("landscape")
@@ -185,7 +206,7 @@ class VideoPlayerController: UIViewController {
     // MARK: - Starts the video from beginning
     /// This is a button to start a video. Here configures the player and set the frame of playerLayer to an UIView (playerView)
     @IBAction func startVideo(_ sender: Any) {
-        
+        hidePlayerControllers()
         let url = Urls.m3u8Video1
         playVideo(url: url)
         
@@ -275,16 +296,23 @@ class VideoPlayerController: UIViewController {
         
         let alert = UIAlertController(title: "Settings", message: "Select any", preferredStyle: .actionSheet)
         
-        alert.addAction(UIAlertAction(title: "Video Speed", style: .default , handler:{ _ in
-            let speedAlert = ActionSheet.shared.speedActionSheet(avPlayer: self.avPlayer)
-            
-            self.present(speedAlert, animated: true, completion: {
-                print("completion block")
-            })
-        }))
+        if !isLiveStream {
+            alert.addAction(UIAlertAction(title: "Video Speed", style: .default , handler:{ _ in
+                let speedAlert = ActionSheet.shared.speedActionSheet(avPlayer: self.avPlayer)
+                
+                self.present(speedAlert, animated: true, completion: {
+                    print("completion block")
+                })
+            }))
+        }
         
         alert.addAction(UIAlertAction(title: "Video Quality", style: .default , handler:{ (UIAlertAction)in
             
+            let qualityAlert = ActionSheet.shared.qualityActionSheet(avPlayer: self.avPlayer)
+            
+            self.present(qualityAlert, animated: true, completion: {
+                print("completion block")
+            })
         }))
 
         alert.addAction(UIAlertAction(title: "Report", style: .destructive , handler:{ (UIAlertAction)in
@@ -347,39 +375,6 @@ class VideoPlayerController: UIViewController {
     }
     
     
-//    func speedActionSheet() {
-//        
-//        let speedAlert = UIAlertController(title: "Video Speed", message: "Select any", preferredStyle: .actionSheet)
-//        
-//        speedAlert.addAction(UIAlertAction(title: "6x", style: .default , handler:{ (UIAlertAction)in
-//            AVPlayerManager.shared.setSpeedToAVPlayer(rate: 6.0, avPlayer: self.avPlayer)
-//        }))
-//        
-//        speedAlert.addAction(UIAlertAction(title: "4x", style: .default , handler:{ (UIAlertAction)in
-//            AVPlayerManager.shared.setSpeedToAVPlayer(rate: 4.0, avPlayer: self.avPlayer)
-//        }))
-//
-//        speedAlert.addAction(UIAlertAction(title: "2x", style: .default , handler:{ (UIAlertAction)in
-//            AVPlayerManager.shared.setSpeedToAVPlayer(rate: 2.0, avPlayer: self.avPlayer)
-//        }))
-//        
-//        speedAlert.addAction(UIAlertAction(title: "Normal", style: .default, handler:{ [self] (UIAlertAction)in
-//            AVPlayerManager.shared.setSpeedToAVPlayer(rate: 1.0, avPlayer: self.avPlayer)
-//        }))
-//        
-//        speedAlert.addAction(UIAlertAction(title: "0.1x", style: .default, handler:{ (UIAlertAction)in
-//            AVPlayerManager.shared.setSpeedToAVPlayer(rate: 0.1, avPlayer: self.avPlayer)
-//        }))
-//        
-//        //uncomment for iPad Support
-//        //alert.popoverPresentationController?.sourceView = self.view
-//
-//        self.present(speedAlert, animated: true, completion: {
-//            print("completion block")
-//        })
-//    }
-    
-    
     // MARK: - Plays the video from beginning
     /// This is a function to start a video for a specific url. Here configures the player and set the frame of playerLayer to an UIView (playerView)
     func playVideo(url: URL?) {
@@ -437,8 +432,17 @@ class VideoPlayerController: UIViewController {
         // Set the player time to playerView
         self.playerView.addSubview(playerTime)
         
+        // Set the player total time/duration to playerView
+        self.playerView.addSubview(playerTotalDuration)
+        
         // Set the settings to playerView
         self.playerView.addSubview(settingButtonOutlet)
+        
+        // Set the live stack (live label and red circle image) to playerView
+        self.playerView.addSubview(liveStack)
+        
+        // Set the progressView to playerView
+        self.playerView.addSubview(progressView)
         
         preview.translatesAutoresizingMaskIntoConstraints = false
         preview.bottomAnchor.constraint(equalTo: self.slider.topAnchor).isActive = true
@@ -465,10 +469,11 @@ class VideoPlayerController: UIViewController {
         startButtonOutlet.isHidden = false
 
         let width = view.bounds.width - 10
-        let height = view.bounds.height/2 - 70
+//        let height = view.bounds.height/2 - 70
+        let height = playerViewHeight
         self.view.addSubview(self.playerView)
         playerView.translatesAutoresizingMaskIntoConstraints = true
-        playerView.frame = CGRect(x: 5, y: 60, width: width, height: height)
+        playerView.frame = CGRect(x: 5, y: 60, width: width, height: height ?? 0.0)
         playerLayer.frame = playerView.bounds
         
     }
@@ -595,11 +600,15 @@ class VideoPlayerController: UIViewController {
         activityIndicator.isHidden = true
         playAndPauseButtonOutlet.isHidden = true
         fullScreenButtonOutlet.isHidden = true
+        progressView.isHidden = true
+        liveLabel.isHidden = true
+        liveRedCircleImage.isHidden = true
         slider.isHidden = true
         forwardSkipButtonOutlet.isHidden = true
         backwardSkipButtonOutlet.isHidden = true
         miniPlayerButtonOutlet.isHidden = true
         playerTime.isHidden = true
+        playerTotalDuration.isHidden = true
         settingButtonOutlet.isHidden = true
         preview.alpha = 0
         
@@ -614,16 +623,40 @@ class VideoPlayerController: UIViewController {
         
         playAndPauseButtonOutlet.isHidden = false
         fullScreenButtonOutlet.isHidden = false
-        slider.isHidden = false
+        
+        if isLiveStream {
+            progressView.isHidden = false
+            playerTotalDuration.isHidden = true
+            playerTime.isHidden = true
+            
+            liveLabel.isHidden = false
+            liveRedCircleImage.isHidden = false
+            
+            UIView.animate(withDuration: 0.7, delay: 0.7, options: [.repeat, .autoreverse]) {
+                self.liveRedCircleImage.layer.opacity = 0.0
+            }
+
+            timer.invalidate()
+        }
+        else {
+            slider.isHidden = false
+            playerTime.isHidden = false
+            playerTotalDuration.isHidden = false
+            
+            liveLabel.isHidden = true
+            liveRedCircleImage.isHidden = true
+        }
+        
         forwardSkipButtonOutlet.isHidden = false
         backwardSkipButtonOutlet.isHidden = false
+        
         if isLandscape || isRotate {
             miniPlayerButtonOutlet.isHidden = true
         }
         else {
             miniPlayerButtonOutlet.isHidden = false
         }
-        playerTime.isHidden = false
+
         settingButtonOutlet.isHidden = false
         preview.alpha = 1
         
@@ -700,8 +733,21 @@ class VideoPlayerController: UIViewController {
     func setPlayerTime() {
         let sliderValue = slider.value
         let time = Utils.shared.secondsToHoursMinutesSeconds(Int(sliderValue))
+        
+        // Player total duration
+        let duration = self.avPlayer.currentItem?.asset.duration
+        
+        guard let duration = duration else {
+            return
+        }
+        
+        let durationInSeconds : Float64 = CMTimeGetSeconds(duration)
+        
+        let playerTotalTimeInString = Utils.shared.secondsToHoursMinutesSeconds(Int(durationInSeconds))
 
         playerTime.text = time
+        playerTotalDuration.text = " /  \(playerTotalTimeInString)"
+        
     }
     
     func changeOpacityOfPlayerLayer(opacity: Float) {
@@ -710,7 +756,7 @@ class VideoPlayerController: UIViewController {
 
         playerLayer.opacity = desiredOpacity
     }
-    
+
     
 }
 
@@ -757,7 +803,6 @@ extension VideoPlayerController: SeekPreviewDelegate {
                 }
             }
         }
-        
     }
     
     
