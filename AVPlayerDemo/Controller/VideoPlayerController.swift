@@ -469,11 +469,10 @@ class VideoPlayerController: UIViewController {
         startButtonOutlet.isHidden = false
 
         let width = view.bounds.width - 10
-//        let height = view.bounds.height/2 - 70
         let height = playerViewHeight
         self.view.addSubview(self.playerView)
         playerView.translatesAutoresizingMaskIntoConstraints = true
-        playerView.frame = CGRect(x: 5, y: 60, width: width, height: height ?? 0.0)
+        playerView.frame = CGRect(x: 5, y: 40, width: width, height: height ?? 0.0)
         playerLayer.frame = playerView.bounds
         
     }
