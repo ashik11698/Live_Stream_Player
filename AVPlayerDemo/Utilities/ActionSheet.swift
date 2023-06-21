@@ -18,7 +18,7 @@ class ActionSheet {
     /// - Returns: returns UIAlertController to show sheet in viewController where the functions called
     func speedActionSheet(avPlayer: AVPlayer) -> UIAlertController {
         
-        let speedAlert = UIAlertController(title: "Video Speed", message: "Select any", preferredStyle: .actionSheet)
+        let speedAlert = UIAlertController(title: "Speed", message: "Select any", preferredStyle: .actionSheet)
         
         speedAlert.addAction(UIAlertAction(title: "6x", style: .default , handler:{ (UIAlertAction)in
             AVPlayerManager.shared.setSpeedToAVPlayer(rate: 6.0, avPlayer: avPlayer)
@@ -44,7 +44,7 @@ class ActionSheet {
         }))
         
         //uncomment for iPad Support
-        //alert.popoverPresentationController?.sourceView = self.view
+        //speedAlert.popoverPresentationController?.sourceView = self.view
         
         return speedAlert
     }
@@ -56,41 +56,41 @@ class ActionSheet {
     /// - Returns: returns UIAlertController to show sheet in viewController where the functions called
     func qualityActionSheet(avPlayer: AVPlayer) -> UIAlertController {
         
-        let speedAlert = UIAlertController(title: "Quality", message: "Select any", preferredStyle: .actionSheet)
+        let qualityAlert = UIAlertController(title: "Quality", message: "Select any", preferredStyle: .actionSheet)
         
-        speedAlert.addAction(UIAlertAction(title: "1080p", style: .default , handler:{ (UIAlertAction)in
+        qualityAlert.addAction(UIAlertAction(title: "1080p", style: .default , handler:{ (UIAlertAction)in
             
         }))
         
-        speedAlert.addAction(UIAlertAction(title: "720p", style: .default , handler:{ (UIAlertAction)in
+        qualityAlert.addAction(UIAlertAction(title: "720p", style: .default , handler:{ (UIAlertAction)in
             
         }))
 
-        speedAlert.addAction(UIAlertAction(title: "480p", style: .default , handler:{ (UIAlertAction)in
+        qualityAlert.addAction(UIAlertAction(title: "480p", style: .default , handler:{ (UIAlertAction)in
             
         }))
         
-        speedAlert.addAction(UIAlertAction(title: "360p", style: .default, handler:{ (UIAlertAction)in
+        qualityAlert.addAction(UIAlertAction(title: "360p", style: .default, handler:{ (UIAlertAction)in
             
         }))
         
-        speedAlert.addAction(UIAlertAction(title: "240p", style: .default, handler:{ (UIAlertAction)in
+        qualityAlert.addAction(UIAlertAction(title: "240p", style: .default, handler:{ (UIAlertAction)in
             
         }))
-        speedAlert.addAction(UIAlertAction(title: "144p", style: .default, handler:{ (UIAlertAction)in
+        qualityAlert.addAction(UIAlertAction(title: "144p", style: .default, handler:{ (UIAlertAction)in
             
         }))
-        speedAlert.addAction(UIAlertAction(title: "Auto", style: .default, handler:{ (UIAlertAction)in
+        qualityAlert.addAction(UIAlertAction(title: "Auto", style: .default, handler:{ (UIAlertAction)in
             
         }))
-        speedAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler:{ (UIAlertAction)in
+        qualityAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler:{ (UIAlertAction)in
             
         }))
         
         //uncomment for iPad Support
-        //alert.popoverPresentationController?.sourceView = self.view
+        //qualityAlert.popoverPresentationController?.sourceView = self.view
         
-        return speedAlert
+        return qualityAlert
     }
     
 }

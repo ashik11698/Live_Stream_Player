@@ -123,6 +123,30 @@ class Utils {
     }
     
     
+    /// This function creates UIView
+    /// - Parameter view: takes the parent view where the newly created UIView will be placed
+    /// - Returns: returns the c reated UIView
+    func createUIView(view: UIView) -> UIView {
+        
+        let myNewView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
+        
+        // Change UIView background colour
+        myNewView.backgroundColor=UIColor.lightGray
+        
+        // Add border to UIView
+        myNewView.layer.borderWidth = 1
+        
+        // Change UIView Border Color to Red
+        myNewView.layer.borderColor = UIColor.black.cgColor
+        
+        // Add UIView as a Subview
+        view.addSubview(myNewView)
+        
+        return myNewView
+        
+    }
+    
+    
     // MARK: - Get Current Time Of Video
     /// This function get the current time and return
     /// - Returns: returns the current time of video
@@ -145,12 +169,14 @@ class Utils {
         let minute = (seconds % 3600) / 60
         let second = (seconds % 3600) % 60
         
-        let timeInString = "\(hour):\(minute):\(second)"
-        
-        return timeInString
-        
-    }
+        if hour > 0 {
+            return String(format: "%i:%02i:%02i", hour, minute, second)
+        }
+        else {
+            return String(format: "%02i:%02i", minute, second)
+        }
 
+    }
     
 }
 

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		043EC82F2A4308FA006E4C05 /* CMTime+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043EC82E2A4308FA006E4C05 /* CMTime+Ext.swift */; };
 		045C0DC42A38053800A162CE /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 045C0DC32A38053800A162CE /* HomeViewController.swift */; };
 		0467E1872A36BC6900696CAB /* Urls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0467E1862A36BC6900696CAB /* Urls.swift */; };
 		04B890562A2DA032008D7C7D /* AVPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04B890552A2DA032008D7C7D /* AVPlayerManager.swift */; };
@@ -25,6 +26,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		043EC82E2A4308FA006E4C05 /* CMTime+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CMTime+Ext.swift"; sourceTree = "<group>"; };
 		045C0DC32A38053800A162CE /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
 		0467E1862A36BC6900696CAB /* Urls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Urls.swift; sourceTree = "<group>"; };
 		04B890552A2DA032008D7C7D /* AVPlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVPlayerManager.swift; sourceTree = "<group>"; };
@@ -90,6 +92,14 @@
 			path = Utilities;
 			sourceTree = "<group>";
 		};
+		043EC82D2A4308EB006E4C05 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				043EC82E2A4308FA006E4C05 /* CMTime+Ext.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 		04C6B45D2A38685A0095825A /* SeekPreview */ = {
 			isa = PBXGroup;
 			children = (
@@ -119,6 +129,7 @@
 		04D491522A28916300490D84 /* AVPlayerDemo */ = {
 			isa = PBXGroup;
 			children = (
+				043EC82D2A4308EB006E4C05 /* Extensions */,
 				04C6B45D2A38685A0095825A /* SeekPreview */,
 				04D5E40F2A3326A800F84D06 /* Constants */,
 				042D90A42A309140005FBC28 /* Utilities */,
@@ -225,6 +236,7 @@
 				04D5E4112A3326C700F84D06 /* Keys.swift in Sources */,
 				04D491542A28916300490D84 /* AppDelegate.swift in Sources */,
 				04D491562A28916300490D84 /* SceneDelegate.swift in Sources */,
+				043EC82F2A4308FA006E4C05 /* CMTime+Ext.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
