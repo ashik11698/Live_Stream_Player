@@ -20,7 +20,6 @@
 		04D4915B2A28916300490D84 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 04D491592A28916300490D84 /* Main.storyboard */; };
 		04D4915D2A28916400490D84 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 04D4915C2A28916400490D84 /* Assets.xcassets */; };
 		04D491602A28916400490D84 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 04D4915E2A28916400490D84 /* LaunchScreen.storyboard */; };
-		04D5E4112A3326C700F84D06 /* Keys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04D5E4102A3326C700F84D06 /* Keys.swift */; };
 		04E24ED42A3B157100136062 /* ActionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E24ED32A3B157100136062 /* ActionSheet.swift */; };
 		04F5ED1E2A32E6EF001309FA /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04F5ED1D2A32E6EF001309FA /* Utils.swift */; };
 /* End PBXBuildFile section */
@@ -41,7 +40,6 @@
 		04D4915C2A28916400490D84 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		04D4915F2A28916400490D84 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		04D491612A28916400490D84 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		04D5E4102A3326C700F84D06 /* Keys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keys.swift; sourceTree = "<group>"; };
 		04E24ED32A3B157100136062 /* ActionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionSheet.swift; sourceTree = "<group>"; };
 		04F5ED1D2A32E6EF001309FA /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -147,7 +145,6 @@
 		04D5E40F2A3326A800F84D06 /* Constants */ = {
 			isa = PBXGroup;
 			children = (
-				04D5E4102A3326C700F84D06 /* Keys.swift */,
 				0467E1862A36BC6900696CAB /* Urls.swift */,
 			);
 			path = Constants;
@@ -233,7 +230,6 @@
 				04C6B4622A3868630095825A /* SeekPreview.swift in Sources */,
 				04E24ED42A3B157100136062 /* ActionSheet.swift in Sources */,
 				045C0DC42A38053800A162CE /* HomeViewController.swift in Sources */,
-				04D5E4112A3326C700F84D06 /* Keys.swift in Sources */,
 				04D491542A28916300490D84 /* AppDelegate.swift in Sources */,
 				04D491562A28916300490D84 /* SceneDelegate.swift in Sources */,
 				043EC82F2A4308FA006E4C05 /* CMTime+Ext.swift in Sources */,

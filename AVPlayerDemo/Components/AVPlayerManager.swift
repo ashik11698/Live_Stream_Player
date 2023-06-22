@@ -16,7 +16,7 @@ class AVPlayerManager {
     func getVideoPlayerOnline(url: URL?) async -> AVPlayer? {
         
         guard let url = url else {
-            print("url not found")
+            debugPrint("url not found")
             return nil
         }
         //test if video is playable

@@ -72,7 +72,12 @@ class VideoPlayerController: UIViewController {
     var isBuffering = false
     
     /// Origin of the mini player
-    var minimizedOrigin: CGPoint?
+    var minimizedOrigin: CGPoint {
+        let x = 0.0
+        let y = (UIScreen.main.bounds.height - (UIScreen.main.bounds.height/7 + 10))
+        let coordinate = CGPoint.init(x: x, y: y)
+        return coordinate
+    }
     
     /// Mini Player Buttons and UIView
     var crossButton = UIButton()
@@ -91,9 +96,6 @@ class VideoPlayerController: UIViewController {
     /// Timer for slider to move continuously
     var timer = Timer()
     
-    /// To store the height of playerView as it change it's height for different orientation of device
-    var playerViewHeight: CGFloat?
-    
     /// Tracks whether live stream is on or off
     var isLiveStream = false
     
@@ -106,15 +108,12 @@ class VideoPlayerController: UIViewController {
         // If app runs first time with landscape mode
         let orientation = Utils.shared.deviceOrientation()
         if orientation == Orientation.landscapeRight.rawValue || orientation == Orientation.landscapeLeft.rawValue {
-            print("landscape")
             self.showVideoInLandscape()
             self.isRotate = true
             self.isLandscape = true
             self.miniPlayerButton.isHidden = true
             self.navigationItem.setHidesBackButton(true, animated: false)
         }
-        
-        playerViewHeight = playerView.frame.size.height
         
         // Hide the buttons of playerView
         hidePlayerControllers()
@@ -162,7 +161,35 @@ class VideoPlayerController: UIViewController {
         
     }
     
+    
+    
+    
+    
+    
+    // Stop the player and invalidate the item before navigating away
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        avPlayer.pause()
+        avPlayer.currentItem?.cancelPendingSeeks()
+        avPlayer.currentItem?.asset.cancelLoading()
+    }
+
+    // Deallocate the player
+    deinit {
+        avPlayer.replaceCurrentItem(with: nil)
+    }
+    
+    
+    
+    
+    
+    
+    
+    
     @objc func playerDidFinishPlaying(note: NSNotification){
+        
+        avPlayer.pause()
+        avPlayer.replaceCurrentItem(with: nil)
         
         timer.invalidate()
         let url = Urls.m3u8Video3
@@ -197,7 +224,6 @@ class VideoPlayerController: UIViewController {
             // Perform any animations or layout-related operations during the transition
             let orientation = Utils.shared.deviceOrientation()
             if orientation == Orientation.portrait.rawValue {
-                print("portrait")
                 self.showVideoInPortrait()
                 self.isRotate = false
                 self.isLandscape = false
@@ -207,7 +233,6 @@ class VideoPlayerController: UIViewController {
                 self.navigationItem.setHidesBackButton(false, animated: false)
             }
             if orientation == Orientation.landscapeRight.rawValue || orientation == Orientation.landscapeLeft.rawValue {
-                print("landscape")
                 self.showVideoInLandscape()
                 self.isRotate = true
                 self.isLandscape = true
@@ -262,6 +287,9 @@ class VideoPlayerController: UIViewController {
             self.miniPlayerUIView.frame.origin.x = -self.view.bounds.width - 20
         } completion: { _ in
             self.miniPlayerUIView.isHidden = true
+            self.avPlayer.pause()
+            self.playerLayer.removeFromSuperlayer()
+            self.playerLayer.player = nil
         }
         
     }
@@ -314,7 +342,7 @@ class VideoPlayerController: UIViewController {
         
         let url = url
         guard let url = url else {
-            print("Video doesn't exist or format issue. Please make sure the correct name of the video and format.")
+            debugPrint("Video doesn't exist or format issue. Please make sure the correct name of the video and format.")
             return
         }
         
@@ -395,6 +423,8 @@ class VideoPlayerController: UIViewController {
     /// This functions calls, when we need to show the video in portrait mode. This function rotates playerLayer and playAndPauseBtnOutlet 360 degree to set the video straight.
     func showVideoInPortrait() {
         
+        fullScreenButton.setImage(UIImage(systemName: "arrow.up.left.and.arrow.down.right"), for: .normal)
+        
         if isRotate {
             playerView.transform = CGAffineTransform(rotationAngle: Utils.shared.degreeToRadian(360))
         }
@@ -410,6 +440,8 @@ class VideoPlayerController: UIViewController {
     // MARK: - Function to show the video in landscape mode
     /// This function calls when the device is in landscape mode. It hides all the button and UIView and set the playerViewframe to the main view (To cover entire screen).
     func showVideoInLandscape() {
+        
+        fullScreenButton.setImage(UIImage(systemName: "arrow.down.right.and.arrow.up.left"), for: .normal)
         
         if isRotate {
             playerView.transform = CGAffineTransform(rotationAngle: Utils.shared.degreeToRadian(360))
@@ -428,24 +460,8 @@ class VideoPlayerController: UIViewController {
     /// This function works when we click the full screen button to enter in full screen mode. It rotates playerView and set the playerView frame to the main view.
     func enterFullScreen() {
         
-        if self.isLandscape == true {
-            print("isRotate")
-            //Rotate the playerView to 360 Degree
-            playerView.transform = CGAffineTransform(rotationAngle: Utils.shared.degreeToRadian(360))
-        }
-        else {
-            print("Not isRotate")
-            //Rotate the playerView to 90 Degree
-            playerView.transform = CGAffineTransform(rotationAngle: Utils.shared.degreeToRadian(90))
-        }
-        
-        self.view.addSubview(self.playerView)
-        playerView.translatesAutoresizingMaskIntoConstraints = true
-        self.playerView.frame = self.view.bounds
-        self.playerLayer.frame = self.playerView.bounds
-        
-        playerLayer.videoGravity = AVLayerVideoGravity.resizeAspect
-        
+        changeDeviceOrientation(to: .landscapeLeft)
+        showVideoInLandscape()
         self.isRotate = true
         
     }
@@ -679,30 +695,6 @@ class VideoPlayerController: UIViewController {
         
     }
     
-    ///  Commented out this code for future if needed
-    /*
-     func showVideoInPortrait() {
-     
-     if isRotate {
-     playerView.transform = CGAffineTransform(rotationAngle: Utils.shared.degreeToRadian(360))
-     }
-     
-     playerView.isHidden = false
-     
-     let width = view.bounds.width - 20
-     let height = playerViewHeight
-     self.view.addSubview(self.playerView)
-     
-     playerView.translatesAutoresizingMaskIntoConstraints = false
-     playerView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 10).isActive = true
-     
-     playerView.bounds.size.height = height ?? 0.0
-     playerView.bounds.size.width = width
-     playerLayer.frame = playerView.bounds
-     
-     }
-     */
-    
 }
 
 
@@ -713,9 +705,7 @@ extension VideoPlayerController: SeekPreviewDelegate {
     func getSeekPreview(value: Float) -> UIImage? {
         
         guard let asset = avPlayer.currentItem?.asset else {return nil}
-        
-        print("Image: ", self.images)
-        
+
         let times = images.keys
         if times.count == 0 {
             return nil
@@ -754,42 +744,96 @@ extension VideoPlayerController: SeekPreviewDelegate {
     // MARK: - Configure the Slider
     /// Did all the tasks of slider here
     /// This function is a redeclaration of configureSlider. Here the task has been done with Timer.
-//    func configureSlider(color: UIColor) {
-//
-//        slider.tintColor = color
-//        slider.minimumValue = 0
-//        let duration = self.avPlayer.currentItem?.asset.duration
-//
-//        guard let duration = duration else {
-//            return
-//        }
-//
-//        let seconds : Float64 = CMTimeGetSeconds(duration)
-//
-//        slider.maximumValue = Float(seconds)
-//        slider.isContinuous = true
-//        slider.isUserInteractionEnabled = true
-//
-//        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-//
-//            guard let avPlayer = self?.avPlayer else {
-//                return
-//            }
-//
-//            let currentTime = Utils.shared.getCurrentTimeOfVideo(avPlayer: avPlayer)
-//
-//            if self?.isBuffering == false {
-//
-//                // Sets the value of slider to playerTime label
-//                self?.setPlayerTime()
-//
-//                self?.slider.setValue(Float(currentTime), animated: true)
-//            }
-//        }
-//
-//        slider.addTarget(self, action: #selector(self.playbackSliderValueChanged(_:)), for: .valueChanged)
-//
-//    }
+/*
+    func configureSlider(color: UIColor) {
+
+        slider.tintColor = color
+        slider.minimumValue = 0
+        let duration = self.avPlayer.currentItem?.asset.duration
+
+        guard let duration = duration else {
+            return
+        }
+
+        let seconds : Float64 = CMTimeGetSeconds(duration)
+
+        slider.maximumValue = Float(seconds)
+        slider.isContinuous = true
+        slider.isUserInteractionEnabled = true
+
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+
+            guard let avPlayer = self?.avPlayer else {
+                return
+            }
+
+            let currentTime = Utils.shared.getCurrentTimeOfVideo(avPlayer: avPlayer)
+
+            if self?.isBuffering == false {
+
+                // Sets the value of slider to playerTime label
+                self?.setPlayerTime()
+
+                self?.slider.setValue(Float(currentTime), animated: true)
+            }
+        }
+
+        slider.addTarget(self, action: #selector(self.playbackSliderValueChanged(_:)), for: .valueChanged)
+
+    }
+ 
+ */
+    
+ 
+/*
+    // MARK: - Function for entering in full screen
+    /// This function works when we click the full screen button to enter in full screen mode. It rotates playerView and set the playerView frame to the main view.
+    func enterFullScreen() {
+        
+        if self.isLandscape == true {
+            //Rotate the playerView to 360 Degree
+            playerView.transform = CGAffineTransform(rotationAngle: Utils.shared.degreeToRadian(360))
+        }
+        else {
+            //Rotate the playerView to 90 Degree
+            playerView.transform = CGAffineTransform(rotationAngle: Utils.shared.degreeToRadian(90))
+        }
+
+        self.view.addSubview(self.playerView)
+        playerView.translatesAutoresizingMaskIntoConstraints = true
+        self.playerView.frame = self.view.bounds
+        self.playerLayer.frame = self.playerView.bounds
+
+        playerLayer.videoGravity = AVLayerVideoGravity.resizeAspect
+
+        self.isRotate = true
+    }
+*/
+    
+    
+/*
+    ///  Commented out this code for future if needed
+     func showVideoInPortrait() {
+     
+     if isRotate {
+     playerView.transform = CGAffineTransform(rotationAngle: Utils.shared.degreeToRadian(360))
+     }
+     
+     playerView.isHidden = false
+     
+     let width = view.bounds.width - 20
+     let height = playerViewHeight
+     self.view.addSubview(self.playerView)
+     
+     playerView.translatesAutoresizingMaskIntoConstraints = false
+     playerView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 10).isActive = true
+     
+     playerView.bounds.size.height = height ?? 0.0
+     playerView.bounds.size.width = width
+     playerLayer.frame = playerView.bounds
+     
+     }
+*/
     
 }
 
@@ -801,9 +845,20 @@ extension VideoPlayerController: UINavigationControllerDelegate {
            !navigationController.viewControllers.contains(previousViewController) {
             // The previous view controller is not in the navigation stack anymore.
             // You can perform any cleanup or deallocation tasks here.
+            
+            playerView.removeFromSuperview()
+            
             avPlayer.pause()
+            avPlayer.replaceCurrentItem(with: nil)
+            previousViewController.willMove(toParent: nil)
+            previousViewController.view.removeFromSuperview()
+            previousViewController.removeFromParent()
+            
+            avPlayer.currentItem?.cancelPendingSeeks()
+            avPlayer.currentItem?.asset.cancelLoading()
             // For example, you could call a deinitializer or release resources.
             previousViewController.removeFromParent()
+            debugPrint("Go Back To Home")
         }
     }
     
@@ -815,14 +870,12 @@ extension VideoPlayerController {
     
     func setPositionPlayAndPauseButton() {
         
-        
-        
         playAndPauseButton.setImage(UIImage(systemName: "pause.fill"), for: .normal)
         playAndPauseButton.tintColor = UIColor.white
         
         playAndPauseButton.translatesAutoresizingMaskIntoConstraints = false
         
-        playAndPauseButton.widthAnchor.constraint(equalToConstant: 30).isActive = true
+        playAndPauseButton.widthAnchor.constraint(equalToConstant: 50).isActive = true
         playAndPauseButton.heightAnchor.constraint(equalToConstant: 30).isActive = true
         
         playerView.addSubview(playAndPauseButton)
@@ -844,7 +897,7 @@ extension VideoPlayerController {
         
         forwardSkipButton.translatesAutoresizingMaskIntoConstraints = false
         
-        forwardSkipButton.widthAnchor.constraint(equalToConstant: 30).isActive = true
+        forwardSkipButton.widthAnchor.constraint(equalToConstant: 50).isActive = true
         forwardSkipButton.heightAnchor.constraint(equalToConstant: 30).isActive = true
         
         playerView.addSubview(forwardSkipButton)
@@ -866,7 +919,7 @@ extension VideoPlayerController {
         
         backwardSkipButton.translatesAutoresizingMaskIntoConstraints = false
         
-        backwardSkipButton.widthAnchor.constraint(equalToConstant: 30).isActive = true
+        backwardSkipButton.widthAnchor.constraint(equalToConstant: 50).isActive = true
         backwardSkipButton.heightAnchor.constraint(equalToConstant: 30).isActive = true
         
         playerView.addSubview(backwardSkipButton)
@@ -904,7 +957,7 @@ extension VideoPlayerController {
         
         miniPlayerButton.translatesAutoresizingMaskIntoConstraints = false
         
-        miniPlayerButton.widthAnchor.constraint(equalToConstant: 30).isActive = true
+        miniPlayerButton.widthAnchor.constraint(equalToConstant: 50).isActive = true
         miniPlayerButton.heightAnchor.constraint(equalToConstant: 30).isActive = true
         
         playerView.addSubview(miniPlayerButton)
@@ -927,7 +980,7 @@ extension VideoPlayerController {
         
         settingButton.translatesAutoresizingMaskIntoConstraints = false
         
-        settingButton.widthAnchor.constraint(equalToConstant: 30).isActive = true
+        settingButton.widthAnchor.constraint(equalToConstant: 50).isActive = true
         settingButton.heightAnchor.constraint(equalToConstant: 30).isActive = true
         
         playerView.addSubview(settingButton)
@@ -946,29 +999,35 @@ extension VideoPlayerController {
     func setPositionFullScreenButtonOutlet() {
         
         fullScreenButton.setImage(UIImage(systemName: "arrow.up.left.and.arrow.down.right"), for: .normal)
+        
         fullScreenButton.tintColor = UIColor.red
         
         fullScreenButton.translatesAutoresizingMaskIntoConstraints = false
         
-        fullScreenButton.widthAnchor.constraint(equalToConstant: 30).isActive = true
+        fullScreenButton.widthAnchor.constraint(equalToConstant: 50).isActive = true
         fullScreenButton.heightAnchor.constraint(equalToConstant: 30).isActive = true
         
         playerView.addSubview(fullScreenButton)
         
-        let bottomConstraint = fullScreenButton.bottomAnchor.constraint(equalTo: playerView.bottomAnchor, constant: -15)
+        if isLiveStream {
+            fullScreenButton.bottomAnchor.constraint(equalTo: progressView.bottomAnchor, constant: -15).isActive = true
+        }
+        else {
+            fullScreenButton.bottomAnchor.constraint(equalTo: playerView.bottomAnchor, constant: -15).isActive = true
+        }
         
-        let trailingConstraint = fullScreenButton.trailingAnchor.constraint(equalTo: playerView.trailingAnchor, constant: -15)
-        
-        NSLayoutConstraint.activate([bottomConstraint, trailingConstraint])
+        fullScreenButton.trailingAnchor.constraint(equalTo: playerView.trailingAnchor, constant: -15).isActive = true
         
         fullScreenButton.addTarget(self, action: #selector(makeVideoFullScreen), for: .touchUpInside)
         
     }
     
     
-    func setPositionSlider(color: UIColor) {
+    func setPositionSlider(minimumTrackTintColor: UIColor, maximumTrackTintColor: UIColor, thumbTintColor: UIColor) {
         
-        slider.tintColor = color
+        slider.maximumTrackTintColor = maximumTrackTintColor
+        slider.minimumTrackTintColor = minimumTrackTintColor
+        slider.thumbTintColor = thumbTintColor
         
         slider.translatesAutoresizingMaskIntoConstraints = false
         
@@ -1033,7 +1092,7 @@ extension VideoPlayerController {
         
         playerView.addSubview(progressView)
         
-        let bottomConstraint = progressView.bottomAnchor.constraint(equalTo: playerView.bottomAnchor, constant: 0)
+        let bottomConstraint = progressView.bottomAnchor.constraint(equalTo: playerView.bottomAnchor, constant: -15)
         
         let leadingConstraint = progressView.leadingAnchor.constraint(equalTo: playerView.leadingAnchor, constant: 0)
         
@@ -1059,9 +1118,9 @@ extension VideoPlayerController {
         
         playerView.addSubview(liveStack)
         
-        let bottomConstraint = liveStack.bottomAnchor.constraint(equalTo: progressView.topAnchor, constant: -5)
+        let bottomConstraint = liveStack.bottomAnchor.constraint(equalTo: progressView.topAnchor, constant: -10)
         
-        let leadingConstraint = liveStack.leadingAnchor.constraint(equalTo: playerView.leadingAnchor, constant: 4)
+        let leadingConstraint = liveStack.leadingAnchor.constraint(equalTo: playerView.leadingAnchor, constant: 15)
         
         NSLayoutConstraint.activate([bottomConstraint, leadingConstraint])
         
@@ -1155,7 +1214,7 @@ extension VideoPlayerController {
                 self.iPadActionSheet(sheet: speedAlert)
                 
                 self.present(speedAlert, animated: true, completion: {
-                    print("completion block")
+                    
                 })
             }))
         }
@@ -1168,8 +1227,12 @@ extension VideoPlayerController {
             self.iPadActionSheet(sheet: qualityAlert)
             
             self.present(qualityAlert, animated: true, completion: {
-                print("completion block")
+                
             })
+        }))
+        
+        alert.addAction(UIAlertAction(title: "Share", style: .default , handler:{ (UIAlertAction)in
+            
         }))
         
         alert.addAction(UIAlertAction(title: "Report", style: .destructive , handler:{ (UIAlertAction)in
@@ -1184,7 +1247,7 @@ extension VideoPlayerController {
         iPadActionSheet(sheet: alert)
         
         self.present(alert, animated: true, completion: {
-            print("completion block")
+            
         })
         
     }
@@ -1196,12 +1259,14 @@ extension VideoPlayerController {
         
         if self.isRotate == false {
             enterFullScreen()
+            fullScreenButton.setImage(UIImage(systemName: "arrow.down.right.and.arrow.up.left"), for: .normal)
             self.miniPlayerButton.isHidden = true
             self.hideMiniPlayerButtons()
             self.navigationItem.setHidesBackButton(true, animated: false)
         }
         else {
             ExitFullScreen()
+            fullScreenButton.setImage(UIImage(systemName: "arrow.up.left.and.arrow.down.right"), for: .normal)
             self.miniPlayerButton.isHidden = false
             self.navigationItem.setHidesBackButton(false, animated: false)
         }
@@ -1218,11 +1283,15 @@ extension VideoPlayerController {
         setPositionActivityIndicator(color: UIColor.red)
         setPositionMiniPlayerButtonOutlet()
         setPositionSettingButtonOutlet()
+        setPositionProgressView()
         setPositionFullScreenButtonOutlet()
-        setPositionSlider(color: UIColor.red)
+        setPositionSlider(
+            minimumTrackTintColor: UIColor.red,
+            maximumTrackTintColor: UIColor.systemGray,
+            thumbTintColor: UIColor.red
+        )
         setPositionPlayerTime()
         setPositionPlayerTotalDuration()
-        setPositionProgressView()
         setPositionLiveStack()
         
     }

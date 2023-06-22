@@ -20,13 +20,8 @@ class HomeViewController: UIViewController {
         
        if (segue.identifier == "segueID") {
            
-           let x = 0.0
-           let y = (UIScreen.main.bounds.height - (UIScreen.main.bounds.height/7 + 10))
-           let coordinate = CGPoint.init(x: x, y: y)
-           
            let secondView = segue.destination as! VideoPlayerController
            secondView.isLiveStream = isLive
-           secondView.minimizedOrigin = coordinate
            
        }
     }

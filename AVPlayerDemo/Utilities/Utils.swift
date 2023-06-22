@@ -8,6 +8,17 @@
 import UIKit
 import AVKit
 
+
+enum Orientation: String {
+    case portrait = "Portrait"
+    case upsideDown = "Upside Down"
+    case landscapeRight = "Landscape Right"
+    case landscapeLeft = "Landscape Left"
+    case cameraFacingDown = "Camera Facing Down"
+    case cameraFacingUp = "Camera Facing Up"
+    case unknown = "Unknown"
+}
+
 class Utils {
     
     static let shared = Utils()
@@ -47,25 +58,25 @@ class Utils {
             switch deviceOrientationRaw {
             case 1:
                 deviceOrientation = Orientation.portrait.rawValue
-                print("Portrait")
+                debugPrint("portrait")
             case 2:
                 deviceOrientation = Orientation.upsideDown.rawValue
-                print("Upside Down")
+                debugPrint("upsideDown")
             case 3:
                 deviceOrientation = Orientation.landscapeRight.rawValue
-                print("Landscape Right")
+                debugPrint("landscapeRight")
             case 4:
                 deviceOrientation = Orientation.landscapeLeft.rawValue
-                print("Landscape Left")
+                debugPrint("landscapeLeft")
             case 5:
                 deviceOrientation = Orientation.cameraFacingDown.rawValue
-                print("Camera Facing Down")
+                debugPrint("cameraFacingDown")
             case 6:
                 deviceOrientation = Orientation.cameraFacingUp.rawValue
-                print("Camera Facing Up")
+                debugPrint("cameraFacingUp")
             default:
                 deviceOrientation = Orientation.unknown.rawValue
-                print("Unknown")
+                debugPrint("unknown")
             }
             return deviceOrientation
         } else {

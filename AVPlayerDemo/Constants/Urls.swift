@@ -20,4 +20,8 @@ struct Urls {
     
     static let m3u8Video3 = URL(string: "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8")
     
+    static let m3u8Video4 = URL(string: "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8")
+    
 }
+
+
