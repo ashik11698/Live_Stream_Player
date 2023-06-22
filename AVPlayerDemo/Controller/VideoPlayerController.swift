@@ -85,7 +85,7 @@ class VideoPlayerController: UIViewController {
     var miniPlayerUIView = UIView()
     
     var playerLayer = AVPlayerLayer()
-    var avPlayer = AVPlayer()
+    var avPlayer: AVPlayer?
     
     var preview = SeekPreview()
     var images: [ Double : UIImage ] = [:]
@@ -149,7 +149,7 @@ class VideoPlayerController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(self.activeFromBackground), name: UIApplication.didBecomeActiveNotification, object: nil)
         
         // Observe if video is finished or not
-        NotificationCenter.default.addObserver(self, selector:#selector(self.playerDidFinishPlaying(note:)),name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: avPlayer.currentItem)
+        NotificationCenter.default.addObserver(self, selector:#selector(self.playerDidFinishPlaying(note:)),name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: avPlayer?.currentItem)
         
         // Play Video
         hidePlayerControllers()
@@ -162,36 +162,21 @@ class VideoPlayerController: UIViewController {
     }
     
     
-    
-    
-    
-    
-    // Stop the player and invalidate the item before navigating away
+    /// Stop player while disappearing the viewController
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        avPlayer.pause()
-        avPlayer.currentItem?.cancelPendingSeeks()
-        avPlayer.currentItem?.asset.cancelLoading()
-    }
 
-    // Deallocate the player
-    deinit {
-        avPlayer.replaceCurrentItem(with: nil)
+        stopPlayerAndPlayerObserver()
     }
-    
-    
-    
-    
-    
-    
     
     
     @objc func playerDidFinishPlaying(note: NSNotification){
         
-        avPlayer.pause()
-        avPlayer.replaceCurrentItem(with: nil)
-        
+        avPlayer?.pause()
+        avPlayer?.replaceCurrentItem(with: nil)
         timer.invalidate()
+        avPlayer = nil
+        
         let url = Urls.m3u8Video3
         playVideo(url: url)
         
@@ -287,7 +272,7 @@ class VideoPlayerController: UIViewController {
             self.miniPlayerUIView.frame.origin.x = -self.view.bounds.width - 20
         } completion: { _ in
             self.miniPlayerUIView.isHidden = true
-            self.avPlayer.pause()
+            self.avPlayer?.pause()
             self.playerLayer.removeFromSuperlayer()
             self.playerLayer.player = nil
         }
@@ -347,10 +332,10 @@ class VideoPlayerController: UIViewController {
         }
         
         avPlayer = AVPlayer(url: url)
-        playerLayer = AVPlayerLayer(player: avPlayer)
+        playerLayer = AVPlayerLayer(player: avPlayer ?? AVPlayer())
         
         // Buffer
-        avPlayer.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
+        avPlayer?.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
         
         configureSlider(color: UIColor.red)
         //self.setupVideoTimeSlider()
@@ -415,7 +400,7 @@ class VideoPlayerController: UIViewController {
         }
         
         // Play the video
-        avPlayer.play()
+        avPlayer?.play()
     }
     
     
@@ -489,9 +474,9 @@ class VideoPlayerController: UIViewController {
         
         let interval = CMTime(seconds: 1, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
         let mainQueue = DispatchQueue.main
-        avPlayer.addPeriodicTimeObserver(forInterval: interval, queue: mainQueue) { [weak self] time in
-            guard let currentItem = self?.avPlayer.currentItem else {return}
-            if self?.avPlayer.currentItem!.status == .readyToPlay {
+        avPlayer?.addPeriodicTimeObserver(forInterval: interval, queue: mainQueue) { [weak self] time in
+            guard let currentItem = self?.avPlayer?.currentItem else {return}
+            if self?.avPlayer?.currentItem!.status == .readyToPlay {
                 self?.slider.minimumValue = 0
                 self?.slider.maximumValue = Float(currentItem.duration.seconds)
                 
@@ -512,7 +497,7 @@ class VideoPlayerController: UIViewController {
         
         let seconds: Int64 = Int64(playbackSlider.value)
         let targetTime: CMTime = CMTimeMake(value: seconds, timescale: 1)
-        avPlayer.seek(to: targetTime)
+        avPlayer?.seek(to: targetTime)
         
         setPlayerTime()
         
@@ -617,13 +602,13 @@ class VideoPlayerController: UIViewController {
     func togglePauseAndPlay() {
         
         if !isPause {
-            avPlayer.pause()
+            avPlayer?.pause()
             
             playAndPauseButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
             playAndPauseButtonForMiniPlayer.setImage(UIImage(systemName: "play.fill"), for: .normal)
         }
         else {
-            avPlayer.play()
+            avPlayer?.play()
             
             playAndPauseButton.setImage(UIImage(systemName: "pause.fill"), for: .normal)
             playAndPauseButtonForMiniPlayer.setImage(UIImage(systemName: "pause.fill"), for: .normal)
@@ -662,7 +647,7 @@ class VideoPlayerController: UIViewController {
         let time = Utils.shared.secondsToHoursMinutesSeconds(Int(sliderValue))
         
         // Player total duration
-        let duration = self.avPlayer.currentItem?.asset.duration
+        let duration = self.avPlayer?.currentItem?.asset.duration
         
         guard let duration = duration else {
             return
@@ -695,6 +680,23 @@ class VideoPlayerController: UIViewController {
         
     }
     
+    
+    func stopPlayerAndPlayerObserver() {
+        
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: avPlayer?.currentItem)
+
+        avPlayer?.pause()
+        avPlayer = nil
+        avPlayer?.replaceCurrentItem(with: nil)
+
+        playerLayer.removeFromSuperlayer()
+        playerLayer.player = nil
+
+        avPlayer?.currentItem?.cancelPendingSeeks()
+        avPlayer?.currentItem?.asset.cancelLoading()
+        
+    }
+    
 }
 
 
@@ -704,7 +706,7 @@ extension VideoPlayerController: SeekPreviewDelegate {
     /// Function of SeekPreviewDelegate
     func getSeekPreview(value: Float) -> UIImage? {
         
-        guard let asset = avPlayer.currentItem?.asset else {return nil}
+        guard let asset = avPlayer?.currentItem?.asset else {return nil}
 
         let times = images.keys
         if times.count == 0 {
@@ -723,7 +725,7 @@ extension VideoPlayerController: SeekPreviewDelegate {
     /// Generate images according to time
     func generateImages() {
         self.images = [:]
-        guard let asset = avPlayer.currentItem?.asset else {
+        guard let asset = avPlayer?.currentItem?.asset else {
             return
         }
         
@@ -838,6 +840,26 @@ extension VideoPlayerController: SeekPreviewDelegate {
 }
 
 
+//extension VideoPlayerController: UINavigationControllerDelegate {
+//
+//    func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
+//        if let previousViewController = navigationController.transitionCoordinator?.viewController(forKey: .from),
+//           !navigationController.viewControllers.contains(previousViewController) {
+//            // The previous view controller is not in the navigation stack anymore.
+//            // You can perform any cleanup or deallocation tasks here.
+//
+//            avPlayer?.pause()
+//            avPlayer?.replaceCurrentItem(with: nil)
+//
+//            // For example, you could call a deinitializer or release resources.
+//            previousViewController.removeFromParent()
+//            debugPrint("Go Back To Home")
+//        }
+//    }
+//
+//}
+
+
 extension VideoPlayerController: UINavigationControllerDelegate {
     
     func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
@@ -846,19 +868,12 @@ extension VideoPlayerController: UINavigationControllerDelegate {
             // The previous view controller is not in the navigation stack anymore.
             // You can perform any cleanup or deallocation tasks here.
             
-            playerView.removeFromSuperview()
-            
-            avPlayer.pause()
-            avPlayer.replaceCurrentItem(with: nil)
-            previousViewController.willMove(toParent: nil)
-            previousViewController.view.removeFromSuperview()
-            previousViewController.removeFromParent()
-            
-            avPlayer.currentItem?.cancelPendingSeeks()
-            avPlayer.currentItem?.asset.cancelLoading()
+            stopPlayerAndPlayerObserver()
+
             // For example, you could call a deinitializer or release resources.
             previousViewController.removeFromParent()
             debugPrint("Go Back To Home")
+            
         }
     }
     
@@ -1154,7 +1169,7 @@ extension VideoPlayerController {
     @objc func skipVideoInForward() {
         
         //skipTimeForward(seconds: 10)
-        AVPlayerManager.shared.skipTimeForward(seconds: 10, avPlayer: avPlayer)
+        AVPlayerManager.shared.skipTimeForward(seconds: 10, avPlayer: avPlayer ?? AVPlayer())
         setPlayerTime()
         
     }
@@ -1164,7 +1179,7 @@ extension VideoPlayerController {
     @objc func skipVideoInBackward() {
         
         //skipTimeBackward(seconds: 10)
-        AVPlayerManager.shared.skipTimeBackward(seconds: 10, avPlayer: avPlayer)
+        AVPlayerManager.shared.skipTimeBackward(seconds: 10, avPlayer: avPlayer ?? AVPlayer())
         setPlayerTime()
         
     }
@@ -1208,7 +1223,7 @@ extension VideoPlayerController {
         
         if !isLiveStream {
             alert.addAction(UIAlertAction(title: "Speed", style: .default , handler:{ _ in
-                let speedAlert = ActionSheet.shared.speedActionSheet(avPlayer: self.avPlayer)
+                let speedAlert = ActionSheet.shared.speedActionSheet(avPlayer: self.avPlayer ?? AVPlayer())
                 
                 //for iPad Support
                 self.iPadActionSheet(sheet: speedAlert)
@@ -1221,7 +1236,7 @@ extension VideoPlayerController {
         
         alert.addAction(UIAlertAction(title: "Quality", style: .default , handler:{ (UIAlertAction)in
             
-            let qualityAlert = ActionSheet.shared.qualityActionSheet(avPlayer: self.avPlayer)
+            let qualityAlert = ActionSheet.shared.qualityActionSheet(avPlayer: self.avPlayer ??  AVPlayer())
             
             //for iPad Support
             self.iPadActionSheet(sheet: qualityAlert)
